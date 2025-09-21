@@ -1,6 +1,7 @@
 package baitaplon.nhom4.client.main;
 
 import baitaplon.nhom4.client.model.ModelPlayer;
+import baitaplon.nhom4.client.model.ModelResult;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
@@ -18,7 +19,7 @@ public class GameScreen extends javax.swing.JFrame {
         this.player = player;
         initComponents();
         initInfo();
-        countDown(30);
+        countDown(5);
     }
     
     private void initInfo(){
@@ -59,6 +60,11 @@ public class GameScreen extends javax.swing.JFrame {
         btnCheck.setForeground(new java.awt.Color(255, 255, 255));
         btnCheck.setText("Kiểm tra");
         btnCheck.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        btnCheck.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnCheckMouseClicked(evt);
+            }
+        });
         btnCheck.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCheckActionPerformed(evt);
@@ -184,6 +190,13 @@ public class GameScreen extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCheckActionPerformed
 
+    private void btnCheckMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCheckMouseClicked
+        if(checkAnswer()){
+            int score = Integer.parseInt(myScore.getText());
+            myScore.setText(""+(score+1));
+        }
+    }//GEN-LAST:event_btnCheckMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -250,11 +263,25 @@ public class GameScreen extends javax.swing.JFrame {
                 time--;
             }
             if (time < 0) {
-                
+                String ans = "Hòa";
+                int mScore = Integer.parseInt(myScore.getText());
+                int oScore = Integer.parseInt(opponentScore.getText());
+                if(mScore > oScore){
+                    ans = "Win";
+                } else if(mScore < oScore) ans = "Loss";
+                ModelResult result = new ModelResult(myName.getText(),myScore.getText(),
+                        opponentName.getText(),opponentScore.getText(), ans);
+                GameResult gameResult = new GameResult(result);
+                gameResult.setVisible(true);
+                this.dispose();
             }
 
         });
         countDownThread.start();
 
+    }
+
+    private boolean checkAnswer() {
+        return true;
     }
 }

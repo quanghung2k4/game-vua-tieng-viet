@@ -110,9 +110,9 @@ public class HomeForm extends javax.swing.JPanel {
                 dashBoard.setVisible(true);
             }
         };
-        ModelPlayer x1 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony Nguyen", 20, "Online");
-        ModelPlayer x2 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony Nguyen", 20, "Busy");
-        ModelPlayer x3 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony Nguyen", 20, "Offline");
+        ModelPlayer x1 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony A", 20, "Online");
+        ModelPlayer x2 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony B", 20, "Busy");
+        ModelPlayer x3 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony C", 20, "Offline");
         table1.addRow((Object[]) x1.toRowTable1(eventAction));
         table1.addRow((Object[]) x2.toRowTable1(eventAction));
         table1.addRow((Object[]) x3.toRowTable1(eventAction));
