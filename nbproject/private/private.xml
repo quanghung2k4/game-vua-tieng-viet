@@ -3,14 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/swing/Label.java</file>
-            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/table/Table.java</file>
-            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/component/MainForm.java</file>
             <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/component/HomeForm.java</file>
             <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/main/GameScreen.java</file>
-            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/table/EventAction.java</file>
-            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/model/ModelPlayer.java</file>
-            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/table/Profile.java</file>
+            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/main/Login.java</file>
             <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/main/DashBoard.java</file>
         </group>
     </open-files>

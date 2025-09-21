@@ -1,5 +1,6 @@
 package baitaplon.nhom4.client.main;
 
+import baitaplon.nhom4.client.model.ModelPlayer;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
@@ -11,10 +12,17 @@ public class GameScreen extends javax.swing.JFrame {
 
     private Thread countDownThread;
     private int time;
+    private static ModelPlayer player;
 
-    public GameScreen() {
+    public GameScreen(ModelPlayer player) {
+        this.player = player;
         initComponents();
+        initInfo();
         countDown(30);
+    }
+    
+    private void initInfo(){
+        opponentName.setText(player.getName());
     }
 
     @SuppressWarnings("unchecked")
@@ -206,7 +214,7 @@ public class GameScreen extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GameScreen().setVisible(true);
+                new GameScreen(player).setVisible(true);
             }
         });
     }
@@ -238,6 +246,7 @@ public class GameScreen extends javax.swing.JFrame {
                 } catch (InterruptedException e) {
                     System.out.println(e);
                 }
+                if(time % 5 == 0 )opponentScore.setText(""+(Integer.parseInt(opponentScore.getText()) + 1));
                 time--;
             }
             if (time < 0) {

@@ -1,6 +1,8 @@
 package baitaplon.nhom4.client.component;
 
+import baitaplon.nhom4.client.main.GameScreen;
 import baitaplon.nhom4.client.model.ModelPlayer;
+import baitaplon.nhom4.client.model.ModelProfile;
 import baitaplon.nhom4.client.table.EventAction;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
@@ -104,7 +106,8 @@ public class HomeForm extends javax.swing.JPanel {
         eventAction = new EventAction() {
             @Override
             public void invite(ModelPlayer player) {
-                System.out.println("invent");
+                GameScreen dashBoard = new GameScreen(player);
+                dashBoard.setVisible(true);
             }
         };
         ModelPlayer x1 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony Nguyen", 20, "Online");
@@ -123,17 +126,10 @@ public class HomeForm extends javax.swing.JPanel {
                 if (row >= 0) {
                     // duyệt tất cả cột để tìm ModelPlayer
                     int colCount = table1.getColumnCount();
-                    ModelPlayer player = null;
-                    for (int col = 0; col < colCount; col++) {
-                        
-                        Object value = table1.getValueAt(row, col);
-                        System.out.println(value);
-                        if (value instanceof ModelPlayer) {
-                            player = (ModelPlayer) value;
-                            break; // tìm thấy thì dừng
-                        }
-                    }
-                    System.out.println("click roi");
+                  
+                    ModelProfile profile = (ModelProfile) table1.getValueAt(row, 0);
+                    ModelPlayer player;
+                    player = new ModelPlayer(profile.getIcon(),profile.getName(), (int)table1.getValueAt(row, 1),(String)table1.getValueAt(row,2));
                     if (player != null) {
                         // gọi invite
                         eventAction.invite(player);
