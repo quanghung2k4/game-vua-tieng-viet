@@ -1,6 +1,6 @@
 package baitaplon.nhom4.client.component;
 
-import baitaplon.nhom4.client.main.GameScreen;
+import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.model.ModelProfile;
 import baitaplon.nhom4.client.table.EventAction;

@@ -3,7 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/main/Login.java</file>
+            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/server/MainServer.java</file>
+            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/controller/LoginController.java</file>
+            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/server/DatabaseManager.java</file>
+            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/view/MainClient.java</file>
+            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/client/network/TCPClient.java</file>
+            <file>file:/D:/NetBeansProject/BaiTapLon-Nhom4/src/baitaplon/nhom4/server/ClientHandler.java</file>
         </group>
     </open-files>
 </project-private>
