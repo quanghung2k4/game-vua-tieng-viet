@@ -27,7 +27,7 @@ public class LoginController {
         try {
             MessageModel request = new MessageModel("request_login",username+"|"+password);
             MessageModel response = (MessageModel)client.sendMessage(request);
-
+            
             if ("OK".equals(response.getContent())) {
                 view.showMessage("Đăng nhập thành công!");
             } else {
@@ -37,4 +37,5 @@ public class LoginController {
             view.showMessage("Lỗi kết nối server!");
         }
     }
+    
 }
