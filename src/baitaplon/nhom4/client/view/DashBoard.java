@@ -14,10 +14,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.border.LineBorder;
 import net.miginfocom.swing.MigLayout;
 
-/**
- *
- * @author ADMIN
- */
 public class DashBoard extends javax.swing.JFrame {
 
     private MigLayout layout;
