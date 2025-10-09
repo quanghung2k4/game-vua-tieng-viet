@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="NetBeans Platform">
+    <CLASSES>
+      <root url="file://$USER_HOME$/Downloads/netbeans-27-bin/netbeans/platform/lib" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$USER_HOME$/Downloads/netbeans-27-bin/netbeans/platform/lib" />
+    </NATIVE>
+    <SOURCES />
+    <jarDirectory url="file://$USER_HOME$/Downloads/netbeans-27-bin/netbeans/platform/lib" recursive="false" />
+  </library>
+</component>

@@ -138,6 +138,33 @@ public class Login extends javax.swing.JFrame {
         return new String(txtPassword.getPassword()).trim();
     }
 
-    public void addLoginListener(java.awt.event.ActionListener l) { btnLogin.addActionListener(l); }
+    public void addLoginListener(java.awt.event.ActionListener l) { 
+        // Xóa tất cả ActionListener cũ trước khi thêm mới
+        for (java.awt.event.ActionListener listener : btnLogin.getActionListeners()) {
+            btnLogin.removeActionListener(listener);
+        }
+        btnLogin.addActionListener(l); 
+    }
+    
     public void showMessage(String msg) { javax.swing.JOptionPane.showMessageDialog(this, msg); }
+
+    public void setLoginButtonEnabled(boolean enabled) {
+        btnLogin.setEnabled(enabled);
+    }
+    
+    public void setLoginButtonText(String text) {
+        btnLogin.setText(text);
+    }
+    
+    // Method để clear form sau khi đăng nhập thành công
+    public void clearForm() {
+        txtUserName.setText("");
+        txtPassword.setText("");
+        txtUserName.requestFocus();
+    }
+
+    public void setInputFieldsEnabled(boolean enabled) {
+        txtUserName.setEnabled(enabled);
+        txtPassword.setEnabled(enabled);
+    }
 }

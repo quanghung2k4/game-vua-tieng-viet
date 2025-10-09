@@ -22,7 +22,14 @@ public class DashBoard extends javax.swing.JFrame {
     private MainForm main;
     private int mouseX, mouseY;
 
+    private String username;
+
     public DashBoard() {
+        this("Guest");
+    }
+    
+    public DashBoard(String username) {
+        this.username = username;
         initComponents();
         this.setLocationRelativeTo(null); // đặt form ra giữa màn hình
         getRootPane().setBorder(new javax.swing.border.LineBorder(Color.LIGHT_GRAY, 1, true));
@@ -64,6 +71,9 @@ public class DashBoard extends javax.swing.JFrame {
         background.add(menu, "w 200!, spany 2");
         background.add(header, "h 50!, wrap");
         background.add(main, "w 100%, h 100%");
+        
+        // Set username trong header
+        header.setUsername(username);
     }
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -158,5 +168,15 @@ public class DashBoard extends javax.swing.JFrame {
                 setLocation(x - mouseX, y - mouseY);
             }
         });
+    }
+    
+    // Getter cho username
+    public String getUsername() {
+        return username;
+    }
+    
+    // Method để set title với username
+    public void setTitleWithUsername() {
+        this.setTitle("Game Vua Tiếng Việt - " + username);
     }
 }
