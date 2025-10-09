@@ -12,7 +12,7 @@ import java.net.Socket;
 public class MainClient {
     public static void main(String[] args) {
         Login login = new Login();
-        TCPClient client = new TCPClient("26.246.150.145", 3636);
+        TCPClient client = new TCPClient("172.11.34.131", 3636);
         new LoginController(login, client);
         login.setVisible(true);
     }
