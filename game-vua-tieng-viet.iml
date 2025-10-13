@@ -10,7 +10,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/miglayout-swing-11.4.2.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/TimingFramework-0.55.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -19,7 +19,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/swing-layout-1.0.2.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/miglayout-4.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -28,31 +28,13 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/timingframework-1.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/miglayout-core-11.4.2.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/AbsoluteLayout.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="NetBeans Platform" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/AbsoluteLayout-RELEASE65.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="Netbeans Platform" level="project" />
   </component>
 </module>

@@ -92,6 +92,7 @@ public class LoginController {
             }
 
             String responseContent = response.getContent();
+            System.out.println(responseContent);
             
             if ("OK".equals(responseContent)) {
                 // Đăng nhập thành công
