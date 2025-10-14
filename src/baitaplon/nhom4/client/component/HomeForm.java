@@ -3,11 +3,14 @@ package baitaplon.nhom4.client.component;
 import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.model.ModelProfile;
+import baitaplon.nhom4.client.model.PlayerData;
 import baitaplon.nhom4.client.table.EventAction;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
 
 public class HomeForm extends javax.swing.JPanel {
 
@@ -110,9 +113,42 @@ public class HomeForm extends javax.swing.JPanel {
                 dashBoard.setVisible(true);
             }
         };
+        
+        // Tạo dữ liệu demo ban đầu
+        createFallbackPlayerList();
+    }
+    
+    /**
+     * Cập nhật danh sách người chơi từ server
+     */
+    public void updatePlayerList(List<PlayerData> playerList) {
+        // Xóa tất cả dữ liệu cũ
+        DefaultTableModel model = (DefaultTableModel) table1.getModel();
+        model.setRowCount(0);
+        
+        // Thêm dữ liệu mới
+        for (PlayerData playerData : playerList) {
+            ModelPlayer player = new ModelPlayer(
+                resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),
+                playerData.getDisplayName(),
+                playerData.getTotalPoint(),
+                playerData.getStatus()
+            );
+            table1.addRow((Object[]) player.toRowTable1(eventAction));
+        }
+        
+        // Refresh table
+        table1.repaint();
+        table1.revalidate();
+    }
+    
+    /**
+     * Tạo danh sách người chơi demo khi không có dữ liệu từ server
+     */
+    private void createFallbackPlayerList() {
         ModelPlayer x1 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony A", 20, "Online");
-        ModelPlayer x2 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony B", 20, "Busy");
-        ModelPlayer x3 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony C", 20, "Offline");
+        ModelPlayer x2 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony B", 15, "Busy");
+        ModelPlayer x3 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony C", 25, "Offline");
         table1.addRow((Object[]) x1.toRowTable1(eventAction));
         table1.addRow((Object[]) x2.toRowTable1(eventAction));
         table1.addRow((Object[]) x3.toRowTable1(eventAction));

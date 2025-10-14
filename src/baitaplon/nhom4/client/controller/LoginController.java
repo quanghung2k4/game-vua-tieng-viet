@@ -145,8 +145,8 @@ public class LoginController {
      * Mở Dashboard sau khi đăng nhập thành công
      */
     private void openDashboard(String username) {
-        // Tạo Dashboard với username
-        DashBoard dashboard = new DashBoard(username);
+        // Tạo Dashboard với username và client
+        DashBoard dashboard = new DashBoard(username, client);
         
         // Set title cho window
         dashboard.setTitleWithUsername();
