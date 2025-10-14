@@ -11,9 +11,28 @@ import java.net.Socket;
  */
 public class MainClient {
     public static void main(String[] args) {
-        Login login =new Login();
-        TCPClient client = new TCPClient("localhost", 12345);
+        // Set Look and Feel cho toàn bộ ứng dụng
+        setLookAndFeel();
+        
+        // Tạo TCPClient một lần duy nhất và tái sử dụng
+        TCPClient client = new TCPClient("26.244.192.199", 3636);
+        
+        // Tạo Login form với client
+        Login login = new Login(client);
         new LoginController(login, client);
         login.setVisible(true);
+    }
+    
+    private static void setLookAndFeel() {
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(MainClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
     }
 }

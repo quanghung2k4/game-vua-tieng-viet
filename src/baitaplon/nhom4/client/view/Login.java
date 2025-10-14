@@ -2,10 +2,18 @@
 package baitaplon.nhom4.client.view;
 
 import java.awt.Color;
+import baitaplon.nhom4.client.network.TCPClient;
 
 public class Login extends javax.swing.JFrame {
 
+    private TCPClient client;
+
     public Login() {
+        this(null);
+    }
+    
+    public Login(TCPClient client) {
+        this.client = client;
         initComponents();
         getContentPane().setBackground(new Color(255,255,255));
         this.setLocationRelativeTo(null); // đặt form ra giữa màn hình
@@ -21,6 +29,7 @@ public class Login extends javax.swing.JFrame {
         txtUserName = new baitaplon.nhom4.client.swing.TextField();
         btnLogin = new baitaplon.nhom4.client.swing.Button();
         txtPassword = new baitaplon.nhom4.client.swing.PasswordField();
+        btnRegister = new baitaplon.nhom4.client.swing.Button();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -49,14 +58,26 @@ public class Login extends javax.swing.JFrame {
         txtPassword.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         txtPassword.setLabelText("Mật khẩu");
 
+        btnRegister.setBackground(new java.awt.Color(108, 117, 125));
+        btnRegister.setForeground(new java.awt.Color(255, 255, 255));
+        btnRegister.setText("Đăng ký");
+        btnRegister.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        btnRegister.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegisterActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(355, Short.MAX_VALUE)
+                .addContainerGap(280, Short.MAX_VALUE)
                 .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(344, 344, 344))
+                .addGap(18, 18, 18)
+                .addComponent(btnRegister, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(280, 280, 280))
             .addGroup(layout.createSequentialGroup()
                 .addGap(200, 200, 200)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -75,7 +96,9 @@ public class Login extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
-                .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnRegister, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(38, 38, 38))
         );
 
@@ -85,6 +108,10 @@ public class Login extends javax.swing.JFrame {
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
 
     }//GEN-LAST:event_btnLoginActionPerformed
+
+    private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
+        openRegisterForm();
+    }//GEN-LAST:event_btnRegisterActionPerformed
 
     /**
      * @param args the command line arguments
@@ -123,6 +150,7 @@ public class Login extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private baitaplon.nhom4.client.swing.Button btnLogin;
+    private baitaplon.nhom4.client.swing.Button btnRegister;
     private javax.swing.JLabel jLabel1;
     private baitaplon.nhom4.client.swing.PasswordField txtPassword;
     private baitaplon.nhom4.client.swing.TextField txtUserName;
@@ -138,6 +166,51 @@ public class Login extends javax.swing.JFrame {
         return new String(txtPassword.getPassword()).trim();
     }
 
-    public void addLoginListener(java.awt.event.ActionListener l) { btnLogin.addActionListener(l); }
+    public void addLoginListener(java.awt.event.ActionListener l) { 
+        // Xóa tất cả ActionListener cũ trước khi thêm mới
+        for (java.awt.event.ActionListener listener : btnLogin.getActionListeners()) {
+            btnLogin.removeActionListener(listener);
+        }
+        btnLogin.addActionListener(l); 
+    }
+    
     public void showMessage(String msg) { javax.swing.JOptionPane.showMessageDialog(this, msg); }
+
+    public void setLoginButtonEnabled(boolean enabled) {
+        btnLogin.setEnabled(enabled);
+    }
+    
+    public void setLoginButtonText(String text) {
+        btnLogin.setText(text);
+    }
+    
+    // Method để clear form sau khi đăng nhập thành công
+    public void clearForm() {
+        txtUserName.setText("");
+        txtPassword.setText("");
+        txtUserName.requestFocus();
+    }
+
+    public void setInputFieldsEnabled(boolean enabled) {
+        txtUserName.setEnabled(enabled);
+        txtPassword.setEnabled(enabled);
+    }
+    
+    // Method để mở form Register
+    private void openRegisterForm() {
+        Register register = new Register(client);
+        new baitaplon.nhom4.client.controller.RegisterController(register, client);
+        register.setVisible(true);
+        this.dispose();
+    }
+    
+    // Getter cho client
+    public TCPClient getClient() {
+        return client;
+    }
+    
+    // Setter cho client
+    public void setClient(TCPClient client) {
+        this.client = client;
+    }
 }

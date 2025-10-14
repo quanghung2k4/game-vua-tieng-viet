@@ -48,4 +48,13 @@ public class Header extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private baitaplon.nhom4.client.component.UserName userName1;
     // End of variables declaration//GEN-END:variables
+    
+    /**
+     * Set username để hiển thị trong header
+     */
+    public void setUsername(String username) {
+        if (userName1 != null) {
+            userName1.setText(username);
+        }
+    }
 }

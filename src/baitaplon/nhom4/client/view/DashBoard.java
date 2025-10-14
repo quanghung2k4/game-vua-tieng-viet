@@ -7,10 +7,14 @@ import baitaplon.nhom4.client.component.MainForm;
 import baitaplon.nhom4.client.component.Menu;
 import baitaplon.nhom4.client.component.RankScore;
 import baitaplon.nhom4.client.component.RankWin;
+import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.event.EventMenuSelected;
+import baitaplon.nhom4.client.network.TCPClient;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.border.LineBorder;
 import net.miginfocom.swing.MigLayout;
 
@@ -20,14 +24,30 @@ public class DashBoard extends javax.swing.JFrame {
     private Menu menu;
     private Header header;
     private MainForm main;
+    private HomeForm homeForm;
     private int mouseX, mouseY;
 
+    private String username;
+    private TCPClient client;
+    private DashBoardController controller;
+
     public DashBoard() {
+        this("Guest", null);
+    }
+    
+    public DashBoard(String username) {
+        this(username, null);
+    }
+    
+    public DashBoard(String username, TCPClient client) {
+        this.username = username;
+        this.client = client;
         initComponents();
         this.setLocationRelativeTo(null); // đặt form ra giữa màn hình
         getRootPane().setBorder(new javax.swing.border.LineBorder(Color.LIGHT_GRAY, 1, true));
         mouseLister();
         init();
+        addWindowListener();
     }
 
     private void init() {
@@ -36,13 +56,17 @@ public class DashBoard extends javax.swing.JFrame {
         menu = new Menu();
         header = new Header();
         main = new MainForm();
+        homeForm = new HomeForm();
+        
         menu.addEvent(new EventMenuSelected() {
             @Override
             public void menuSelected(int menuIndex) {
-                System.out.println(menuIndex);
+                System.out.println("Menu selected: " + menuIndex);
                 switch (menuIndex) {
                     case 0:
-                        main.showForm(new HomeForm());
+                        main.showForm(homeForm);
+                        // Khởi tạo controller và bắt đầu lấy danh sách người chơi
+                        initializePlayerListRefresh();
                         break;
                     case 1:
                         main.showForm(new RankScore());
@@ -54,7 +78,8 @@ public class DashBoard extends javax.swing.JFrame {
                         main.showForm(new History());
                         break;
                     default:
-                        main.showForm(new HomeForm());
+                        main.showForm(homeForm);
+                        initializePlayerListRefresh();
                         break;
                 }
             }
@@ -64,6 +89,44 @@ public class DashBoard extends javax.swing.JFrame {
         background.add(menu, "w 200!, spany 2");
         background.add(header, "h 50!, wrap");
         background.add(main, "w 100%, h 100%");
+        
+        // Set username trong header
+        header.setUsername(username);
+        
+        // Hiển thị HomeForm mặc định
+        main.showForm(homeForm);
+        initializePlayerListRefresh();
+    }
+    
+    /**
+     * Khởi tạo và bắt đầu việc lấy danh sách người chơi từ server
+     */
+    private void initializePlayerListRefresh() {
+        if (client != null && controller == null) {
+            controller = new DashBoardController(this, client, homeForm);
+            controller.startPlayerListRefresh();
+            System.out.println("Đã khởi tạo DashBoardController và bắt đầu lấy danh sách người chơi");
+        } else if (controller != null) {
+            // Nếu đã có controller, chỉ cần đảm bảo nó đang chạy
+            if (!controller.isRunning()) {
+                controller.startPlayerListRefresh();
+            }
+        }
+    }
+    
+    /**
+     * Thêm window listener để dừng refresh khi đóng window
+     */
+    private void addWindowListener() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (controller != null) {
+                    controller.stopPlayerListRefresh();
+                    System.out.println("Đã dừng refresh danh sách người chơi");
+                }
+            }
+        });
     }
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -158,5 +221,15 @@ public class DashBoard extends javax.swing.JFrame {
                 setLocation(x - mouseX, y - mouseY);
             }
         });
+    }
+    
+    // Getter cho username
+    public String getUsername() {
+        return username;
+    }
+    
+    // Method để set title với username
+    public void setTitleWithUsername() {
+        this.setTitle("Game Vua Tiếng Việt - " + username);
     }
 }

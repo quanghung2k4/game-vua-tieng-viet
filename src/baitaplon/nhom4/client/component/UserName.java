@@ -62,4 +62,20 @@ public class UserName extends javax.swing.JPanel {
     private com.raven.swing.ImageAvatar imageAvatar1;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
+    
+    /**
+     * Set text cho username
+     */
+    public void setText(String username) {
+        if (jLabel1 != null) {
+            jLabel1.setText("Xin chào, " + username);
+        }
+    }
+    
+    /**
+     * Get current text
+     */
+    public String getText() {
+        return jLabel1 != null ? jLabel1.getText() : "";
+    }
 }
