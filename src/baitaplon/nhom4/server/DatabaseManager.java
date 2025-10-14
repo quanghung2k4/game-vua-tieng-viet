@@ -1,16 +1,27 @@
-
 package baitaplon.nhom4.server;
 
-import com.sun.jdi.connect.spi.Connection;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
-class DatabaseManager {
-    private static final String URL = "jdbc:mysql://localhost:3306/penalty_shootout";
-    private static final String USER = "root"; 
-    private static final String PASSWORD = "123456";
+public class DatabaseManager {
 
-    private Connection conn;
+    private static final String URL = "jdbc:mysql://localhost:3306/LTM";
+    private static final String USER = "root";
+    private static final String PASSWORD = "lohuyls123";
 
-    public DatabaseManager() {
-//        conn = DriverManager.getConnection(URL, USER, PASSWORD);
+    private DatabaseManager() {}
+
+    public static Connection getConnection() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (ClassNotFoundException e) {
+            System.err.println("Không tìm thấy driver MySQL JDBC!");
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi kết nối đến cơ sở dữ liệu: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
