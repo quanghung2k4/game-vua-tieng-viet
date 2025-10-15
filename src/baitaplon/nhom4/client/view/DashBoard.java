@@ -34,16 +34,19 @@ public class DashBoard extends javax.swing.JFrame {
     public DashBoard() {
         this("Guest", null);
     }
-    
+
     public DashBoard(String username) {
         this(username, null);
     }
-    
+
     public DashBoard(String username, TCPClient client) {
         this.username = username;
         this.client = client;
+
+        
         initComponents();
         this.setLocationRelativeTo(null); // đặt form ra giữa màn hình
+
         getRootPane().setBorder(new javax.swing.border.LineBorder(Color.LIGHT_GRAY, 1, true));
         mouseLister();
         init();
@@ -57,7 +60,11 @@ public class DashBoard extends javax.swing.JFrame {
         header = new Header();
         main = new MainForm();
         homeForm = new HomeForm();
-        
+        setIconImage(
+                new javax.swing.ImageIcon(
+                        getClass().getResource("/baitaplon/nhom4/client/icon/logo.png")
+                ).getImage()
+        );
         menu.addEvent(new EventMenuSelected() {
             @Override
             public void menuSelected(int menuIndex) {
@@ -89,15 +96,15 @@ public class DashBoard extends javax.swing.JFrame {
         background.add(menu, "w 200!, spany 2");
         background.add(header, "h 50!, wrap");
         background.add(main, "w 100%, h 100%");
-        
+
         // Set username trong header
         header.setUsername(username);
-        
+
         // Hiển thị HomeForm mặc định
         main.showForm(homeForm);
         initializePlayerListRefresh();
     }
-    
+
     /**
      * Khởi tạo và bắt đầu việc lấy danh sách người chơi từ server
      */
@@ -113,7 +120,7 @@ public class DashBoard extends javax.swing.JFrame {
             }
         }
     }
-    
+
     /**
      * Thêm window listener để dừng refresh khi đóng window
      */
@@ -134,7 +141,8 @@ public class DashBoard extends javax.swing.JFrame {
         background = new javax.swing.JLayeredPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setUndecorated(true);
+        setTitle("Game vua tiếng việt");
+        setResizable(false);
 
         background.setBackground(new java.awt.Color(231, 231, 231));
         background.setOpaque(true);
@@ -222,12 +230,12 @@ public class DashBoard extends javax.swing.JFrame {
             }
         });
     }
-    
+
     // Getter cho username
     public String getUsername() {
         return username;
     }
-    
+
     // Method để set title với username
     public void setTitleWithUsername() {
         this.setTitle("Game Vua Tiếng Việt - " + username);
