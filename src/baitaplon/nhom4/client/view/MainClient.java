@@ -15,7 +15,7 @@ public class MainClient {
         setLookAndFeel();
         
         // Tạo TCPClient một lần duy nhất và tái sử dụng
-        TCPClient client = new TCPClient("26.244.192.199", 3636);
+        TCPClient client = new TCPClient("26.246.150.145", 3636);
         
         // Tạo Login form với client
         Login login = new Login(client);

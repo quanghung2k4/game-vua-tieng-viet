@@ -7,12 +7,12 @@ import java.sql.Connection;
 public class MainServer {
     private static final int PORT = 3636;
     private ServerSocket serverSocket;
-    private Connection conn; // ✅ Đổi kiểu này về Connection
+    private Connection conn;
 
     public MainServer() {
         try {
             serverSocket = new ServerSocket(PORT);
-            conn = DatabaseManager.getConnection(); // ✅ Gọi hàm static lấy connection
+            conn = DatabaseManager.getConnection();
             System.out.println("✅ Server đang chạy ở port " + PORT);
 
             while (true) {
