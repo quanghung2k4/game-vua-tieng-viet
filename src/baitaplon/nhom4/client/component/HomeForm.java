@@ -1,9 +1,11 @@
 package baitaplon.nhom4.client.component;
 
+import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.model.ModelProfile;
 import baitaplon.nhom4.client.model.PlayerData;
+import baitaplon.nhom4.client.swing.GlassPanePopup;
 import baitaplon.nhom4.client.table.EventAction;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
@@ -15,9 +17,11 @@ import java.util.List;
 public class HomeForm extends javax.swing.JPanel {
 
     private EventAction eventAction;
+    private DashBoardController controller;
 
     public HomeForm() {
         initComponents();
+        // tao thong bao
         table1.setShowGrid(false); // bỏ tất cả grid line
         initTableData();
         tableMouseListen();
@@ -106,18 +110,11 @@ public class HomeForm extends javax.swing.JPanel {
 
     private void initTableData() {
         table1.fixTable(jScrollPane1);
-        eventAction = new EventAction() {
-            @Override
-            public void invite(ModelPlayer player) {
-                GameScreen dashBoard = new GameScreen(player);
-                dashBoard.setVisible(true);
-            }
-        };
-        
+
         // Tạo dữ liệu demo ban đầu
         createFallbackPlayerList();
     }
-    
+
     /**
      * Cập nhật danh sách người chơi từ server
      */
@@ -125,23 +122,23 @@ public class HomeForm extends javax.swing.JPanel {
         // Xóa tất cả dữ liệu cũ
         DefaultTableModel model = (DefaultTableModel) table1.getModel();
         model.setRowCount(0);
-        
+
         // Thêm dữ liệu mới
         for (PlayerData playerData : playerList) {
             ModelPlayer player = new ModelPlayer(
-                resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),
-                playerData.getDisplayName(),
-                playerData.getTotalPoint(),
-                playerData.getStatus()
+                    resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),
+                    playerData.getDisplayName(),
+                    playerData.getTotalPoint(),
+                    playerData.getStatus()
             );
             table1.addRow((Object[]) player.toRowTable1(eventAction));
         }
-        
+
         // Refresh table
         table1.repaint();
         table1.revalidate();
     }
-    
+
     /**
      * Tạo danh sách người chơi demo khi không có dữ liệu từ server
      */
@@ -162,10 +159,10 @@ public class HomeForm extends javax.swing.JPanel {
                 if (row >= 0) {
                     // duyệt tất cả cột để tìm ModelPlayer
                     int colCount = table1.getColumnCount();
-                  
+
                     ModelProfile profile = (ModelProfile) table1.getValueAt(row, 0);
                     ModelPlayer player;
-                    player = new ModelPlayer(profile.getIcon(),profile.getName(), (int)table1.getValueAt(row, 1),(String)table1.getValueAt(row,2));
+                    player = new ModelPlayer(profile.getIcon(), profile.getName(), (int) table1.getValueAt(row, 1), (String) table1.getValueAt(row, 2));
                     if (player != null) {
                         // gọi invite
                         eventAction.invite(player);
@@ -182,4 +179,20 @@ public class HomeForm extends javax.swing.JPanel {
         Image newImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(newImg);
     }
+
+    public void setController(DashBoardController controller) {
+        this.controller = controller;
+         eventAction = new EventAction() {
+            @Override
+            public void invite(ModelPlayer player) {
+                if (controller != null) {
+                    controller.sendInvite(player);
+                } else {
+                    System.out.println("controller null");
+                }
+
+            }
+        };
+    }
+
 }

@@ -5,11 +5,13 @@ import baitaplon.nhom4.client.component.History;
 import baitaplon.nhom4.client.component.HomeForm;
 import baitaplon.nhom4.client.component.MainForm;
 import baitaplon.nhom4.client.component.Menu;
+import baitaplon.nhom4.client.component.Message;
 import baitaplon.nhom4.client.component.RankScore;
 import baitaplon.nhom4.client.component.RankWin;
 import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.event.EventMenuSelected;
 import baitaplon.nhom4.client.network.TCPClient;
+import baitaplon.nhom4.client.swing.GlassPanePopup;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -43,8 +45,8 @@ public class DashBoard extends javax.swing.JFrame {
         this.username = username;
         this.client = client;
 
-        
         initComponents();
+        GlassPanePopup.install(this);
         this.setLocationRelativeTo(null); // đặt form ra giữa màn hình
 
         getRootPane().setBorder(new javax.swing.border.LineBorder(Color.LIGHT_GRAY, 1, true));
@@ -112,6 +114,7 @@ public class DashBoard extends javax.swing.JFrame {
         if (client != null && controller == null) {
             controller = new DashBoardController(this, client, homeForm);
             controller.startPlayerListRefresh();
+            homeForm.setController(controller);
             System.out.println("Đã khởi tạo DashBoardController và bắt đầu lấy danh sách người chơi");
         } else if (controller != null) {
             // Nếu đã có controller, chỉ cần đảm bảo nó đang chạy
@@ -239,5 +242,9 @@ public class DashBoard extends javax.swing.JFrame {
     // Method để set title với username
     public void setTitleWithUsername() {
         this.setTitle("Game Vua Tiếng Việt - " + username);
+    }
+
+    public void showMessageInvite(String message) {
+        GlassPanePopup.showPopup(new Message());
     }
 }
