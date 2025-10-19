@@ -30,6 +30,9 @@ public class MessageProcessor {
             case "request_player_list":
                 handleGetPlayers(message);
                 break;
+            case "request_challenge":
+                handleChallenge(message);
+                break;
             default:
                 System.out.println("⚠️ Loại message chưa hỗ trợ: " + message.getType());
         }
@@ -71,5 +74,9 @@ public class MessageProcessor {
             System.err.println("❌ Lỗi khi lấy danh sách người chơi: " + e.getMessage());
             client.sendMessage(new MessageModel("return_player_list", "ERROR|Không thể lấy danh sách người chơi"));
         }
+    }
+
+    private void handleChallenge(MessageModel message) {
+        
     }
 }

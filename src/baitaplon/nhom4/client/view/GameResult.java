@@ -316,7 +316,7 @@ public class GameResult extends javax.swing.JFrame {
     }
 
     private void newGame() {
-        ModelPlayer player = new ModelPlayer(null,"Jony B", 20, "Busy");
+        ModelPlayer player = new ModelPlayer("a",null,"Jony B", 20, "Busy");
         GameScreen dashBoard = new GameScreen(player);
         dashBoard.setVisible(true);
     }

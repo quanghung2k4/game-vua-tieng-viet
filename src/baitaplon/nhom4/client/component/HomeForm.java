@@ -49,11 +49,11 @@ public class HomeForm extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Tên", "Điểm", "Trạng thái"
+                "username", "Tên", "Điểm", "Trạng thái"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                true, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -64,9 +64,12 @@ public class HomeForm extends javax.swing.JPanel {
         table1.setUpdateSelectionOnSort(false);
         jScrollPane1.setViewportView(table1);
         if (table1.getColumnModel().getColumnCount() > 0) {
-            table1.getColumnModel().getColumn(0).setResizable(false);
+            table1.getColumnModel().getColumn(0).setMinWidth(0);
+            table1.getColumnModel().getColumn(0).setPreferredWidth(0);
+            table1.getColumnModel().getColumn(0).setMaxWidth(0);
             table1.getColumnModel().getColumn(1).setResizable(false);
             table1.getColumnModel().getColumn(2).setResizable(false);
+            table1.getColumnModel().getColumn(3).setResizable(false);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -126,6 +129,7 @@ public class HomeForm extends javax.swing.JPanel {
         // Thêm dữ liệu mới
         for (PlayerData playerData : playerList) {
             ModelPlayer player = new ModelPlayer(
+                    playerData.getUsername(),
                     resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),
                     playerData.getDisplayName(),
                     playerData.getTotalPoint(),
@@ -133,7 +137,7 @@ public class HomeForm extends javax.swing.JPanel {
             );
             table1.addRow((Object[]) player.toRowTable1(eventAction));
         }
-
+        
         // Refresh table
         table1.repaint();
         table1.revalidate();
@@ -143,9 +147,9 @@ public class HomeForm extends javax.swing.JPanel {
      * Tạo danh sách người chơi demo khi không có dữ liệu từ server
      */
     private void createFallbackPlayerList() {
-        ModelPlayer x1 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony A", 20, "Online");
-        ModelPlayer x2 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony B", 15, "Busy");
-        ModelPlayer x3 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony C", 25, "Offline");
+        ModelPlayer x1 = new ModelPlayer("a",resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony A", 20, "Online");
+        ModelPlayer x2 = new ModelPlayer("b",resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony B", 15, "Busy");
+        ModelPlayer x3 = new ModelPlayer("c",resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony C", 25, "Offline");
         table1.addRow((Object[]) x1.toRowTable1(eventAction));
         table1.addRow((Object[]) x2.toRowTable1(eventAction));
         table1.addRow((Object[]) x3.toRowTable1(eventAction));
@@ -160,9 +164,12 @@ public class HomeForm extends javax.swing.JPanel {
                     // duyệt tất cả cột để tìm ModelPlayer
                     int colCount = table1.getColumnCount();
 
-                    ModelProfile profile = (ModelProfile) table1.getValueAt(row, 0);
+                    ModelProfile profile = (ModelProfile) table1.getValueAt(row, 1);
                     ModelPlayer player;
-                    player = new ModelPlayer(profile.getIcon(), profile.getName(), (int) table1.getValueAt(row, 1), (String) table1.getValueAt(row, 2));
+                    player = new ModelPlayer((String) table1.getValueAt(row, 0)
+                            ,profile.getIcon(), profile.getName()
+                            , (int) table1.getValueAt(row, 2)
+                            , (String) table1.getValueAt(row, 3));
                     if (player != null) {
                         // gọi invite
                         eventAction.invite(player);

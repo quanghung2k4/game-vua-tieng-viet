@@ -106,9 +106,10 @@ public class DashBoardController {
 
             if (response.getType().equals("return_get_players")) {
                 try {
+                    
                     // Parse string response thành danh sách PlayerData
                     List<PlayerData> playerList = parsePlayerListFromString(responseContent);
-
+                    
                     // Cập nhật UI với danh sách mới
                     updatePlayerListUI(playerList);
 
@@ -153,7 +154,7 @@ public class DashBoardController {
 
                     // Kiểm tra nếu username trùng với user hiện tại thì bỏ qua
                     if (!username.equals(getCurrentUsername())) {
-                        PlayerData player = new PlayerData(displayName, status, totalPoint);
+                        PlayerData player = new PlayerData(username,displayName, status, totalPoint);
                         playerList.add(player);
                     }
                 } else {
