@@ -181,5 +181,27 @@ public class UserService {
             throw new RuntimeException("Lỗi database khi lấy thông tin người chơi: " + e.getMessage());
         }
     }
+    public User getUserByUserName(String username) {
+        String sql = "SELECT user_id, username, display_name, status FROM users WHERE username = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setDisplayName(rs.getString("display_name"));
+                user.setStatus(rs.getString("status"));
+                return user;
+            }
+
+            return null;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi database khi lấy thông tin người chơi: " + e.getMessage());
+        }
+    }
 
 }

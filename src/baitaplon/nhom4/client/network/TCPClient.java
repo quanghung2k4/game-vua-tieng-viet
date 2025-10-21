@@ -1,6 +1,7 @@
-
 package baitaplon.nhom4.client.network;
 
+import baitaplon.nhom4.client.controller.DashBoardController;
+import baitaplon.nhom4.client.controller.LoginController;
 import baitaplon.nhom4.client.model.MessageModel;
 import java.io.*;
 import java.io.IOException;
@@ -9,20 +10,94 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class TCPClient {
+
     private final String host;
     private final int port;
+    private Socket socket;
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
+    private boolean running = false;
 
-    public TCPClient(String host, int port) {
+    private DashBoardController dashBoardController;
+    private LoginController loginController;
+
+    public TCPClient(String host, int port) throws IOException {
         this.host = host;
         this.port = port;
+        try {
+            this.socket = new Socket(host, port);
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
+            running = true;
+            new Thread(this::listenServer).start();
+            System.out.println("Kết nối server thành công: " + host + ":" + port);
+        } catch (IOException e) {
+            System.err.println("Không thể kết nối tới server: " + e.getMessage());
+            running = false;
+        }
     }
-    public Object sendMessage(MessageModel message) throws IOException, ClassNotFoundException {
-        try (Socket socket = new Socket(host, port);
-            ObjectOutputStream  out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream  in = new ObjectInputStream (socket.getInputStream())) {
-            out.writeObject(message);      // gửi Message
-            out.flush();
-            return in.readObject();    // đọc Object trả về
+
+
+
+    public void sendMessage(MessageModel message) throws IOException, ClassNotFoundException {
+        out.writeObject(message);      // gửi Message
+        out.flush();
+    }
+
+    private void listenServer() {
+        try {
+            while (running) {
+                MessageModel message = (MessageModel) in.readObject();
+                System.out.println("Nhan duoc "+message.getType());
+                switch (message.getType()){
+                    case "return_login":
+                        loginController.handleLoginResponse(message);
+                        break;
+                    case "return_get_players":
+                        dashBoardController.handlePlayerListResponse(message);
+                        break;
+                    case "receive_invite":
+                        dashBoardController.handleReceiveInvite(message);
+                        break;
+                    case "invite_error":
+                        dashBoardController.handleInviteRespone(message);
+                        break;
+                    case "invite_result":
+                        dashBoardController.handleInviteRespone(message);
+                        break;
+
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Mất kết nối tới server: " + e.getMessage());
+            running = false;
+        }
+    }
+
+
+    public void setDashBoardController(DashBoardController dashBoardController) {
+        this.dashBoardController = dashBoardController;
+    }
+    public void setLoginController(LoginController loginController){
+        this.loginController = loginController;
+    }
+
+
+
+    public void disconnect() {
+        running = false;
+        try {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

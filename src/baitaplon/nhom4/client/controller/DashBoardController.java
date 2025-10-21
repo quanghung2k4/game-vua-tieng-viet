@@ -21,15 +21,18 @@ public class DashBoardController {
 
     private final DashBoard view;
     private final TCPClient client;
-    private final HomeForm homeForm;
+    private HomeForm homeForm;
     private Timer refreshTimer;
     private boolean isRunning = false;
 
-    public DashBoardController(DashBoard view, TCPClient client, HomeForm homeForm) {
+    private ModelPlayer opponentPlayer;
+
+    public DashBoardController(DashBoard view, TCPClient client){
         this.view = view;
         this.client = client;
-        this.homeForm = homeForm;
     }
+
+
 
     /**
      * Bắt đầu lấy danh sách người chơi và cập nhật định kỳ
@@ -77,10 +80,7 @@ public class DashBoardController {
                 MessageModel request = new MessageModel("request_player_list", "");
 
                 // Gửi request đến server
-                MessageModel response = (MessageModel) client.sendMessage(request);
-
-                // Xử lý response
-                handlePlayerListResponse(response);
+                client.sendMessage(request);
 
             } catch (Exception ex) {
                 // Xử lý lỗi kết nối
@@ -94,7 +94,7 @@ public class DashBoardController {
     /**
      * Xử lý response từ server
      */
-    private void handlePlayerListResponse(MessageModel response) {
+    public void handlePlayerListResponse(MessageModel response) {
         SwingUtilities.invokeLater(() -> {
             if (response == null) {
                 System.err.println("Không nhận được phản hồi từ server!");
@@ -102,14 +102,13 @@ public class DashBoardController {
             }
 
             String responseContent = response.getContent();
-            System.out.println("Server response: " + responseContent);
+//            System.out.println("Server response: " + responseContent);
 
-            if (response.getType().equals("return_get_players")) {
                 try {
-                    
+
                     // Parse string response thành danh sách PlayerData
                     List<PlayerData> playerList = parsePlayerListFromString(responseContent);
-                    
+
                     // Cập nhật UI với danh sách mới
                     updatePlayerListUI(playerList);
 
@@ -118,11 +117,7 @@ public class DashBoardController {
                     // Fallback: tạo dữ liệu demo nếu parse lỗi
                     createFallbackPlayerList();
                 }
-            } else {
-                System.err.println("Loại response không mong đợi: " + response.getType());
-                // Fallback: tạo dữ liệu demo
-                createFallbackPlayerList();
-            }
+
         });
     }
 
@@ -186,7 +181,7 @@ public class DashBoardController {
     private void updatePlayerListUI(List<PlayerData> playerList) {
         if (homeForm != null) {
             homeForm.updatePlayerList(playerList);
-        }
+        } else System.out.println("homeform null");
     }
 
     /**
@@ -203,38 +198,14 @@ public class DashBoardController {
      * Gửi lời mời chơi đến server và chờ phản hồi
      */
     public void sendInvite(ModelPlayer player) {
-        view.showMessageInvite("Ðang gui");
+        this.opponentPlayer = player;
+        System.out.println("Ðang gửi lời mời đến "+player.getUsername());
+        view.showMessageInvite("Đang mời người chơi " + player.getName()+" ...");
         new Thread(() -> {
             try {
-//            // Gửi yêu cầu mời người chơi
-//            MessageModel request = new MessageModel("invite_player", targetUsername);
-//            MessageModel response = (MessageModel) client.sendMessage(request);
-                Thread.sleep(1500);
-                SwingUtilities.invokeLater(() -> {
-
-                    GlassPanePopup.closePopupLast();
-                    new GameScreen(player).setVisible(true);
-//                if (response == null) {
-//                    view.showMessageInvite("Không nhận được phản hồi từ server!");
-//                    return;
-//                }
-//
-//                switch (response.getType()) {
-//                    case "invite_success":
-//                        view.showMessageInvite("✅ Đã gửi lời mời đến " + targetUsername + " thành công!");
-//                        break;
-//                    case "invite_rejected":
-//                        view.showMessageInvite("❌ " + targetUsername + " đã từ chối lời mời.");
-//                        break;
-//                    case "invite_accepted":
-//                        view.showMessageInvite("🎮 " + targetUsername + " đã chấp nhận! Trò chơi sẽ bắt đầu...");
-//                        new GameScreen(null).setVisible(true); // mở game mới
-//                        break;
-//                    default:
-//                        view.showMessageInvite("⚠️ Phản hồi không mong đợi: " + response.getType());
-//                        break;
-//                }
-                });
+//             Gửi yêu cầu mời người chơi
+            MessageModel request = new MessageModel("request_invite_player", view.getUsername()+"|"+player.getUsername());
+            client.sendMessage(request);
 
             } catch (Exception ex) {
                 SwingUtilities.invokeLater(()
@@ -244,6 +215,38 @@ public class DashBoardController {
         }).start();
     }
 
+    public void handleInviteRespone(MessageModel message){
+        SwingUtilities.invokeLater(() -> {
+            String [] parse = message.getContent().split("\\|");
+            String opponentName = parse[1];
+            String respone = parse[2];
+            switch (respone) {
+                case "respone_accept":
+                    GlassPanePopup.closePopupLast();
+                    view.showMessageInvite(opponentName + " đã chấp nhận");
+                    break;
+                case "respone_reject":
+                    GlassPanePopup.closePopupLast();
+                    view.showMessageInvite(opponentName + " đã từ chối lời mời.");
+
+                    break;
+                default:
+                    view.showMessageInvite(message.getContent());
+                    break;
+            }
+        });
+    }
+    public void handleReceiveInvite(MessageModel message){
+        String[] parts = message.getContent().split("\\|");
+        String senderUsername = parts[0].split(",")[0];
+        String senderDisplayName = parts[0].split(",")[1];
+        String receiverUsername = parts[1];
+        System.out.println(senderUsername+" "+senderDisplayName+" "+receiverUsername);
+        SwingUtilities.invokeLater(() -> {
+            view.showMessageInvited(senderUsername,receiverUsername,senderDisplayName);
+        });
+
+    }
     /**
      * Tạo danh sách người chơi demo khi không kết nối được server
      */
@@ -264,6 +267,10 @@ public class DashBoardController {
         }
 
         updatePlayerListUI(fallbackList);
+    }
+
+    public void setHomeForm(HomeForm homeForm) {
+        this.homeForm = homeForm;
     }
 
     /**

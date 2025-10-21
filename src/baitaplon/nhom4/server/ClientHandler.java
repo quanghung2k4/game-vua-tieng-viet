@@ -1,6 +1,7 @@
 package baitaplon.nhom4.server;
 
 import baitaplon.nhom4.client.model.MessageModel;
+import baitaplon.nhom4.server.model.User;
 import java.io.*;
 import java.net.*;
 import java.sql.Connection;
@@ -14,6 +15,7 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream out;
     private volatile boolean isRunning = true;
     private MessageProcessor messageProcessor;
+    private User user;
 
     public ClientHandler(Socket socket, MainServer server, Connection conn) {
         this.socket = socket;
@@ -60,5 +62,12 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public User getUser() {
+    return user;
+}
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

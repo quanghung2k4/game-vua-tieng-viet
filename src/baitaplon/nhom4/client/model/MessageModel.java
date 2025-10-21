@@ -11,6 +11,9 @@ public class MessageModel implements Serializable{
         this.content = content;
     }
 
+    public MessageModel() {
+    }
+
     public String getType() {
         return type;
     }

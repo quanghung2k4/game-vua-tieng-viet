@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package baitaplon.nhom4.client.component;
 
 import baitaplon.nhom4.client.swing.GlassPanePopup;
@@ -11,17 +7,17 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 
-/**
- *
- * @author ADMIN
- */
+
 public class Message extends javax.swing.JPanel {
 
     /**
      * Creates new form Message
      */
-    public Message() {
+    private String mess;
+    public Message(String mess) {
+        this.mess = mess;
         initComponents();
+        lbInvite.setText(mess);
         setOpaque(false);
     }
 
@@ -39,13 +35,13 @@ public class Message extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        lbInvite = new javax.swing.JLabel();
         button1 = new baitaplon.nhom4.client.swing.Button();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
-        jLabel1.setText("Đang mời người chơi ...");
+        lbInvite.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        lbInvite.setText("Đang mời người chơi ...");
 
         button1.setBackground(new java.awt.Color(102, 255, 255));
         button1.setForeground(new java.awt.Color(255, 255, 255));
@@ -73,14 +69,14 @@ public class Message extends javax.swing.JPanel {
                         .addComponent(button1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(197, 197, 197))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lbInvite, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(37, 37, 37))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(48, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lbInvite, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(43, 43, 43)
                 .addComponent(button1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(17, 17, 17))
@@ -99,6 +95,6 @@ public class Message extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private baitaplon.nhom4.client.swing.Button button1;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel lbInvite;
     // End of variables declaration//GEN-END:variables
 }
