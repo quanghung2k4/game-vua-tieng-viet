@@ -49,11 +49,11 @@ public class GameScreenController {
 
     // Gọi khi bắt đầu ván hoặc khi hết batch
     public void requestBatch() {
-        try {
-            tcpClient.sendMessage(new MessageModel("request_word_batch", (String) null));
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(layeredPane, "Không gửi được yêu cầu batch: " + e.getMessage());
-        }
+//        try {
+//            tcpClient.sendMessage(new MessageModel("request_word_batch", (String) null));
+//        } catch (IOException e) {
+//            JOptionPane.showMessageDialog(layeredPane, "Không gửi được yêu cầu batch: " + e.getMessage());
+//        }
     }
 
     // Được TCPClient gọi khi server trả batch

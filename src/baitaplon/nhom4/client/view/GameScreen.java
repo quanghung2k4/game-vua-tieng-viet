@@ -17,8 +17,8 @@ public class GameScreen extends javax.swing.JFrame {
     private TCPClient tcpClient;
     private GameScreenController controller;
 
-    public GameScreen(ModelPlayer player, TCPClient tcpClient) {
-        this.tcpClient = tcpClient;
+    public GameScreen(ModelPlayer player) {
+//        this.tcpClient = tcpClient;
         this.player = player;
         initComponents();
         controller = new GameScreenController(this.tcpClient);
