@@ -32,8 +32,6 @@ public class DashBoardController {
         this.client = client;
     }
 
-
-
     /**
      * Bắt đầu lấy danh sách người chơi và cập nhật định kỳ
      */
@@ -228,7 +226,6 @@ public class DashBoardController {
                 case "respone_reject":
                     GlassPanePopup.closePopupLast();
                     view.showMessageInvite(opponentName + " đã từ chối lời mời.");
-
                     break;
                 default:
                     view.showMessageInvite(message.getContent());

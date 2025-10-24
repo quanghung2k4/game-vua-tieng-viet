@@ -2,6 +2,7 @@ package baitaplon.nhom4.server;
 
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.server.model.User;
+import baitaplon.nhom4.shared.game.WordBatchDTO;
 import baitaplon.nhom4.server.service.UserService;
 
 import java.io.IOException;
@@ -17,6 +18,11 @@ public class MessageProcessor {
         this.client = client;
         this.conn = conn;
         this.userService = new UserService(conn);
+        try {
+            GameWordService.init("data/clean.txt");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void process(MessageModel message) throws IOException {
@@ -36,6 +42,11 @@ public class MessageProcessor {
             case "response_invite":
                 handleResponseInvite(message);
                 break;
+            case "request_word_batch": {
+                WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
+                client.sendMessage(new MessageModel("return_word_batch", batch));
+                break;
+            }
             default:
                 System.out.println("⚠️ Loại message chưa hỗ trợ: " + message.getType());
         }
