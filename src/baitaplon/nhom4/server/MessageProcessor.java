@@ -43,11 +43,6 @@ public class MessageProcessor {
             case "response_invite":
                 handleResponseInvite(message);
                 break;
-            case "request_word_batch": {
-                WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
-                client.sendMessage(new MessageModel("return_word_batch", batch));
-                break;
-            }
             case "invite_accept": {
                 // content dự kiến "inviterUsername|inviteeUsername"
                 String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
@@ -57,6 +52,13 @@ public class MessageProcessor {
                     // Bắt đầu game cho cả 2
                     startGameForUsers(inviter, invitee);
                 }
+                break;
+            }
+            case "game_forfeit": {
+                // content: "loserUsername|opponentUsername" (opponent optional)
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
+                GameSessionManager.forfeit(loser);
                 break;
             }
             default:
@@ -181,8 +183,11 @@ public class MessageProcessor {
         long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
         WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
 
-        GameStartDTO dtoAB = new GameStartDTO(userA, userB, batch, startAt, 3);
-        GameStartDTO dtoBA = new GameStartDTO(userB, userA, batch, startAt, 3);
+        User user1 = userService.getUserByUserName(userA);
+        User user2 = userService.getUserByUserName(userB);
+
+        GameStartDTO dtoAB = new GameStartDTO(userA, userB, user1.getDisplayName(), user2.getDisplayName(), batch, startAt, 3);
+        GameStartDTO dtoBA = new GameStartDTO(userB, userA, user2.getDisplayName(), user1.getDisplayName(), batch, startAt, 3);
 
         MessageModel startA = new MessageModel("game_start", dtoAB);
         MessageModel startB = new MessageModel("game_start", dtoBA);

@@ -111,7 +111,7 @@ public class DashBoard extends javax.swing.JFrame {
      */
     private void initializePlayerListRefresh() {
         if (client != null && controller == null) {
-            controller = new DashBoardController(this, client);
+            controller = new DashBoardController(username, this, client);
             controller.setHomeForm(homeForm);
             controller.startPlayerListRefresh();
             homeForm.setController(controller);

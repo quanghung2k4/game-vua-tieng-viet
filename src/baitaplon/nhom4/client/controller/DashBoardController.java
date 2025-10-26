@@ -27,12 +27,13 @@ public class DashBoardController {
     private GameScreen currentGameScreen;
     private Timer refreshTimer;
     private boolean isRunning = false;
-
+    private String username;
     private ModelPlayer opponentPlayer;
 
-    public DashBoardController(DashBoard view, TCPClient client){
+    public DashBoardController(String username, DashBoard view, TCPClient client){
         this.view = view;
         this.client = client;
+        this.username = username;
     }
 
     /**
@@ -228,8 +229,9 @@ public class DashBoardController {
                 String invitee = parse[1];
                 String inviteeName = parse[2];
                 String response = parse[3];
+                System.out.println(response);
                 switch (response) {
-                    case "response-accept":
+                    case "response_accept":
                         GlassPanePopup.closePopupLast();
                         client.sendMessage(new MessageModel("invite_accept", inviter + "|" + invitee));
                         view.showMessageInvite(inviteeName + " đã chấp nhận. Đang bắt đầu trò chơi..."); // optional

@@ -104,6 +104,12 @@ public class ClientHandler implements Runnable {
         }
         isRunning = false;
         try {
+            if (user != null) {
+                GameSessionManager.notifyDisconnect(user.getUsername());
+            }
+        } catch (Exception ignored) {}
+
+        try {
             if (in != null) {
                 try { in.close(); } catch (IOException ignored) {}
             }

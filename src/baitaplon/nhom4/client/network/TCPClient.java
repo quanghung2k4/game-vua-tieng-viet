@@ -4,6 +4,7 @@ import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.controller.LoginController;
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.controller.GameScreenController;
+import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.shared.game.GameStartDTO;
 import baitaplon.nhom4.shared.game.WordBatchDTO;
 
@@ -25,6 +26,7 @@ public class TCPClient {
     private DashBoardController dashBoardController;
     private LoginController loginController;
     private GameScreenController gameScreenController;
+    private volatile GameScreen activeGameScreen;
 
     public TCPClient(String host, int port) throws IOException {
         this.host = host;
@@ -41,8 +43,6 @@ public class TCPClient {
             running = false;
         }
     }
-
-
 
     public void sendMessage(MessageModel message) throws IOException, ClassNotFoundException {
         out.writeObject(message);      // gửi Message
@@ -75,6 +75,11 @@ public class TCPClient {
                             dashBoardController.handleGameStart((GameStartDTO) message.getData());
                         }
                         break;
+                    case "game_end":
+                        if (activeGameScreen != null) {
+                            activeGameScreen.handleGameEnd(message.getContent());
+                        }
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -92,6 +97,9 @@ public class TCPClient {
     }
     public void setGameScreenController(GameScreenController controller) {
         this.gameScreenController = controller;
+    }
+    public void setActiveGameScreen(GameScreen screen) {
+        this.activeGameScreen = screen;
     }
 
 
