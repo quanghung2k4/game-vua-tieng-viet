@@ -4,6 +4,7 @@ import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.controller.LoginController;
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.controller.GameScreenController;
+import baitaplon.nhom4.shared.game.GameStartDTO;
 import baitaplon.nhom4.shared.game.WordBatchDTO;
 
 import java.io.*;
@@ -69,9 +70,9 @@ public class TCPClient {
                     case "invite_result":
                         dashBoardController.handleInviteRespone(message);
                         break;
-                    case "return_word_batch":
-                        if (gameScreenController != null && message.getData() instanceof WordBatchDTO) {
-                            gameScreenController.handleWordBatch((WordBatchDTO) message.getData());
+                    case "game_start":
+                        if (dashBoardController != null && message.getData() instanceof GameStartDTO) {
+                            dashBoardController.handleGameStart((GameStartDTO) message.getData());
                         }
                         break;
                 }

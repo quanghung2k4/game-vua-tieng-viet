@@ -1,13 +1,12 @@
 package baitaplon.nhom4.client.controller;
 
-import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.network.TCPClient;
+import baitaplon.nhom4.client.component.CountDownDialog;
 import baitaplon.nhom4.shared.game.WordBatchDTO;
 import baitaplon.nhom4.shared.game.WordChallengeDTO;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -21,14 +20,13 @@ public class GameScreenController {
     private JPanel selectedLettersPanel;
     private JPanel shuffledLettersPanel;
 
-    private final Deque<WordChallengeDTO> queue = new ArrayDeque<>(32);
+    private final Deque<WordChallengeDTO> queue = new ArrayDeque<>(64);
     private WordChallengeDTO current;
     private final List<String> selectedLetters = new ArrayList<>();
     private final List<JButton> letterButtons = new ArrayList<>();
 
     public GameScreenController(TCPClient tcpClient) {
         this.tcpClient = tcpClient;
-        this.tcpClient.setGameScreenController(this);
     }
 
     public void attachTo(JLayeredPane layeredPane) {
@@ -47,20 +45,16 @@ public class GameScreenController {
         layeredPane.setLayer(shuffledLettersPanel, JLayeredPane.PALETTE_LAYER);
     }
 
-    // Gọi khi bắt đầu ván hoặc khi hết batch
-    public void requestBatch() {
-//        try {
-//            tcpClient.sendMessage(new MessageModel("request_word_batch", (String) null));
-//        } catch (IOException e) {
-//            JOptionPane.showMessageDialog(layeredPane, "Không gửi được yêu cầu batch: " + e.getMessage());
-//        }
-    }
-
-    // Được TCPClient gọi khi server trả batch
-    public void handleWordBatch(WordBatchDTO batch) {
+    public void startWithBatch(WordBatchDTO batch, long startAtEpochMs, int fallbackSeconds, JFrame owner) {
         queue.clear();
         queue.addAll(batch.getChallenges());
-        nextWord();
+
+        long now = System.currentTimeMillis();
+        long msLeft = Math.max(0, startAtEpochMs - now);
+        int seconds = (int)Math.ceil(msLeft / 1000.0);
+        if (seconds <= 0) seconds = Math.max(1, fallbackSeconds);
+
+        CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(this::nextWord));
     }
 
     public boolean checkAnswer() {
@@ -71,7 +65,8 @@ public class GameScreenController {
 
     public void nextWord() {
         if (queue.isEmpty()) {
-            requestBatch();  // xin thêm 30 từ khi đã dùng hết
+            // hết batch (có thể yêu cầu server gửi thêm nếu muốn)
+            JOptionPane.showMessageDialog(layeredPane, "Hết câu hỏi!");
             return;
         }
         current = queue.pollFirst();
@@ -79,8 +74,6 @@ public class GameScreenController {
         renderShuffledLetters();
         renderSelectedLetters();
     }
-
-    // ===== UI render =====
 
     private void renderShuffledLetters() {
         shuffledLettersPanel.removeAll();
@@ -152,9 +145,5 @@ public class GameScreenController {
         label.setBackground(new Color(0, 200, 200, 100));
         label.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
         return label;
-    }
-
-    public String getCurrentWord() {
-        return current != null ? current.getOriginalWord() : "";
     }
 }

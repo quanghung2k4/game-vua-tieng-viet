@@ -2,6 +2,7 @@ package baitaplon.nhom4.server;
 
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.server.model.User;
+import baitaplon.nhom4.shared.game.GameStartDTO;
 import baitaplon.nhom4.shared.game.WordBatchDTO;
 import baitaplon.nhom4.server.service.UserService;
 
@@ -45,6 +46,31 @@ public class MessageProcessor {
             case "request_word_batch": {
                 WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
                 client.sendMessage(new MessageModel("return_word_batch", batch));
+                break;
+            }
+            case "invite_accept": {
+                // content dự kiến "inviterUsername|inviteeUsername"
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                if (parts.length >= 2) {
+                    String inviter = parts[0];
+                    String invitee = parts[1];
+                    // Thông báo kết quả cũ nếu hệ thống đang dùng
+                    sendInviteResponse(inviter, invitee, "respone_accept");
+                    // Bắt đầu game cho cả 2
+                    startGameForUsers(inviter, invitee);
+                }
+                break;
+            }
+            case "invite_result": {
+                // Nếu hệ thống cũ đang bắn "respone_accept" từ đây, hãy gọi startGameForUsers() ngay sau khi gửi respone
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                if (parts.length >= 2 && "respone_accept".equals(parts[1])) {
+                    String inviter = parts[0];
+                    String invitee = parts.length >= 3 ? parts[2] : null; // tùy định dạng content cũ
+                    if (invitee != null) {
+                        startGameForUsers(inviter, invitee);
+                    }
+                }
                 break;
             }
             default:
@@ -162,5 +188,30 @@ public class MessageProcessor {
             e.printStackTrace();
             client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý phản hồi lời mời: " + e.getMessage()));
         }
+    }
+    private void sendInviteResponse(String inviter, String invitee, String type) throws IOException {
+        // Gửi thông điệp “respone_accept” như hệ thống hiện hành (nếu cần thiết)
+        MessageModel resp = new MessageModel("invite_result", inviter + "|" + type + "|" + invitee);
+        ClientHandler inviterH = MainServer.getClientHandlerByUserName(inviter);
+        ClientHandler inviteeH = MainServer.getClientHandlerByUserName(invitee);
+        if (inviterH != null) inviterH.sendMessage(resp);
+        if (inviteeH != null) inviteeH.sendMessage(resp);
+    }
+
+    private void startGameForUsers(String userA, String userB) throws IOException {
+        long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
+        WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
+
+        GameStartDTO dtoAB = new GameStartDTO(userA, userB, batch, startAt, 3);
+        GameStartDTO dtoBA = new GameStartDTO(userB, userA, batch, startAt, 3);
+
+        MessageModel startA = new MessageModel("game_start", dtoAB);
+        MessageModel startB = new MessageModel("game_start", dtoBA);
+
+        ClientHandler hA = MainServer.getClientHandlerByUserName(userA);
+        ClientHandler hB = MainServer.getClientHandlerByUserName(userB);
+
+        if (hA != null) hA.sendMessage(startA);
+        if (hB != null) hB.sendMessage(startB);
     }
 }

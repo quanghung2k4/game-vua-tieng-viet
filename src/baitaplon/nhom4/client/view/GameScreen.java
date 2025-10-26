@@ -4,6 +4,7 @@ import baitaplon.nhom4.client.controller.GameScreenController;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.model.ModelResult;
 import baitaplon.nhom4.client.network.TCPClient;
+import baitaplon.nhom4.shared.game.GameStartDTO;
 
 import javax.swing.*;
 
@@ -11,22 +12,26 @@ public class GameScreen extends javax.swing.JFrame {
 
     private Thread countDownThread;
     private int time;
-    private static ModelPlayer player;
 
     // Controller gameplay
     private TCPClient tcpClient;
     private GameScreenController controller;
 
-    public GameScreen(ModelPlayer player) {
-//        this.tcpClient = tcpClient;
-        this.player = player;
+    public GameScreen(TCPClient tcpClient) {
+//        this.player = player;
+        this.tcpClient = tcpClient;
         initComponents();
-        controller = new GameScreenController(this.tcpClient);
-        controller.attachTo(jLayeredPane1);
-        controller.requestBatch();
+        initController();
         countDown(120);
     }
-
+    private void initController() {
+        controller = new GameScreenController(tcpClient);
+        controller.attachTo(jLayeredPane1);
+    }
+    public void startGame(GameStartDTO dto) {
+        // đồng bộ countdown theo thời điểm server đưa xuống
+        controller.startWithBatch(dto.getBatch(), dto.getStartAtEpochMs(), dto.getCountdownSeconds(), this);
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -192,7 +197,6 @@ public class GameScreen extends javax.swing.JFrame {
         if (controller.checkAnswer()) {
             int score = Integer.parseInt(myScore.getText());
             myScore.setText("" + (score + 1));
-            JOptionPane.showMessageDialog(this, "✅ Chính xác! " + controller.getCurrentWord());
             controller.nextWord();
         } else {
             JOptionPane.showMessageDialog(this, "❌ Sai rồi! Hãy thử lại.");
@@ -217,7 +221,7 @@ public class GameScreen extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(GameScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        java.awt.EventQueue.invokeLater(() -> new GameScreen(player).setVisible(true));
+//        java.awt.EventQueue.invokeLater(() -> new GameScreen(tcpClient).setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

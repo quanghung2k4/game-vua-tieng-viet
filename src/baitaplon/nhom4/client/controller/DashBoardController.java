@@ -8,6 +8,8 @@ import baitaplon.nhom4.client.component.HomeForm;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.swing.GlassPanePopup;
 import baitaplon.nhom4.client.view.GameScreen;
+import baitaplon.nhom4.shared.game.GameStartDTO;
+
 import javax.swing.SwingUtilities;
 import java.util.ArrayList;
 import java.util.List;
@@ -264,6 +266,22 @@ public class DashBoardController {
         }
 
         updatePlayerListUI(fallbackList);
+    }
+
+    public void handleGameStart(GameStartDTO dto) {
+        SwingUtilities.invokeLater(() -> {
+            // Đóng popup nếu đang mở
+            try { baitaplon.nhom4.client.swing.GlassPanePopup.closePopupLast(); } catch (Exception ignored) {}
+            // Mở GameScreen, truyền TCPClient để tiếp tục kết nối
+            GameScreen screen = new GameScreen(client);
+            screen.setLocationRelativeTo(null);
+            screen.startGame(dto);
+
+            // (tuỳ bạn) Ẩn hoặc dispose dashboard
+            if (view != null) {
+                view.setVisible(false);
+            }
+        });
     }
 
     public void setHomeForm(HomeForm homeForm) {
