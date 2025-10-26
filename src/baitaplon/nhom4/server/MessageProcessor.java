@@ -61,18 +61,6 @@ public class MessageProcessor {
                 }
                 break;
             }
-            case "invite_result": {
-                // Nếu hệ thống cũ đang bắn "respone_accept" từ đây, hãy gọi startGameForUsers() ngay sau khi gửi respone
-                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
-                if (parts.length >= 2 && "respone_accept".equals(parts[1])) {
-                    String inviter = parts[0];
-                    String invitee = parts.length >= 3 ? parts[2] : null; // tùy định dạng content cũ
-                    if (invitee != null) {
-                        startGameForUsers(inviter, invitee);
-                    }
-                }
-                break;
-            }
             default:
                 System.out.println("⚠️ Loại message chưa hỗ trợ: " + message.getType());
         }
@@ -181,7 +169,8 @@ public class MessageProcessor {
 
             MessageModel reply = new MessageModel();
             reply.setType("invite_result");
-            reply.setContent(receiverUsername + "|" +receiver.getDisplayName()+"|"+ response);
+//            reply.setContent(receiverUsername + "|" +receiver.getDisplayName()+"|"+ response);
+            reply.setContent(senderUsername + "|" +receiverUsername+"|" +receiver.getDisplayName()+"|"+ response);
 
             senderClient.sendMessage(reply);
         } catch (Exception e) {

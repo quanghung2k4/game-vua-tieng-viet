@@ -24,6 +24,7 @@ public class DashBoardController {
     private final DashBoard view;
     private final TCPClient client;
     private HomeForm homeForm;
+    private GameScreen currentGameScreen;
     private Timer refreshTimer;
     private boolean isRunning = false;
 
@@ -215,23 +216,34 @@ public class DashBoardController {
         }).start();
     }
 
+    public void handleInviteErrorRespone(MessageModel message){
+        System.out.println(message.getContent());
+    }
+
     public void handleInviteRespone(MessageModel message){
         SwingUtilities.invokeLater(() -> {
-            String [] parse = message.getContent().split("\\|");
-            String opponentName = parse[1];
-            String respone = parse[2];
-            switch (respone) {
-                case "respone_accept":
-                    GlassPanePopup.closePopupLast();
-                    view.showMessageInvite(opponentName + " đã chấp nhận");
-                    break;
-                case "respone_reject":
-                    GlassPanePopup.closePopupLast();
-                    view.showMessageInvite(opponentName + " đã từ chối lời mời.");
-                    break;
-                default:
-                    view.showMessageInvite(message.getContent());
-                    break;
+            try{
+                String [] parse = message.getContent().split("\\|");
+                String inviter = parse[0];
+                String invitee = parse[1];
+                String inviteeName = parse[2];
+                String response = parse[3];
+                switch (response) {
+                    case "respone-accept":
+                        GlassPanePopup.closePopupLast();
+                        client.sendMessage(new MessageModel("invite_accept", inviter + "|" + invitee));
+                        view.showMessageInvite(inviteeName + " đã chấp nhận. Đang bắt đầu trò chơi..."); // optional
+                        break;
+                    case "respone_reject":
+                        GlassPanePopup.closePopupLast();
+                        view.showMessageInvite(inviteeName + " đã từ chối lời mời.");
+                        break;
+                    default:
+                        view.showMessageInvite(message.getContent());
+                        break;
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -270,17 +282,17 @@ public class DashBoardController {
 
     public void handleGameStart(GameStartDTO dto) {
         SwingUtilities.invokeLater(() -> {
-            // Đóng popup nếu đang mở
-            try { baitaplon.nhom4.client.swing.GlassPanePopup.closePopupLast(); } catch (Exception ignored) {}
-            // Mở GameScreen, truyền TCPClient để tiếp tục kết nối
-            GameScreen screen = new GameScreen(client);
-            screen.setLocationRelativeTo(null);
-            screen.startGame(dto);
-
-            // (tuỳ bạn) Ẩn hoặc dispose dashboard
-            if (view != null) {
-                view.setVisible(false);
+            // Mở GameScreen (nếu chưa mở), truyền tcp client để controller có thể lắng nghe thêm
+            if (currentGameScreen == null) {
+                currentGameScreen = new GameScreen(client);
+                currentGameScreen.setLocationRelativeTo(null);
+                currentGameScreen.setVisible(true);
             }
+            // Forward DTO để GameScreen bắt đầu countdown và hiển thị batch
+            currentGameScreen.startGame(dto);
+
+            // Ẩn dashboard
+            if (view != null) view.setVisible(false);
         });
     }
 

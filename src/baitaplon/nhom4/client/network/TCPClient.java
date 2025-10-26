@@ -65,7 +65,7 @@ public class TCPClient {
                         dashBoardController.handleReceiveInvite(message);
                         break;
                     case "invite_error":
-                        dashBoardController.handleInviteRespone(message);
+                        dashBoardController.handleInviteErrorRespone(message);
                         break;
                     case "invite_result":
                         dashBoardController.handleInviteRespone(message);
