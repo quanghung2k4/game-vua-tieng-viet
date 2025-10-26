@@ -216,11 +216,11 @@ public class DashBoardController {
         }).start();
     }
 
-    public void handleInviteErrorRespone(MessageModel message){
+    public void handleInviteErrorResponse(MessageModel message){
         System.out.println(message.getContent());
     }
 
-    public void handleInviteRespone(MessageModel message){
+    public void handleInviteResponse(MessageModel message){
         SwingUtilities.invokeLater(() -> {
             try{
                 String [] parse = message.getContent().split("\\|");
@@ -229,12 +229,12 @@ public class DashBoardController {
                 String inviteeName = parse[2];
                 String response = parse[3];
                 switch (response) {
-                    case "respone-accept":
+                    case "response-accept":
                         GlassPanePopup.closePopupLast();
                         client.sendMessage(new MessageModel("invite_accept", inviter + "|" + invitee));
                         view.showMessageInvite(inviteeName + " đã chấp nhận. Đang bắt đầu trò chơi..."); // optional
                         break;
-                    case "respone_reject":
+                    case "response_reject":
                         GlassPanePopup.closePopupLast();
                         view.showMessageInvite(inviteeName + " đã từ chối lời mời.");
                         break;

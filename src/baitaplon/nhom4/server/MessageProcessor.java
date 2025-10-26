@@ -54,8 +54,6 @@ public class MessageProcessor {
                 if (parts.length >= 2) {
                     String inviter = parts[0];
                     String invitee = parts[1];
-                    // Thông báo kết quả cũ nếu hệ thống đang dùng
-                    sendInviteResponse(inviter, invitee, "respone_accept");
                     // Bắt đầu game cho cả 2
                     startGameForUsers(inviter, invitee);
                 }
@@ -177,14 +175,6 @@ public class MessageProcessor {
             e.printStackTrace();
             client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý phản hồi lời mời: " + e.getMessage()));
         }
-    }
-    private void sendInviteResponse(String inviter, String invitee, String type) throws IOException {
-        // Gửi thông điệp “respone_accept” như hệ thống hiện hành (nếu cần thiết)
-        MessageModel resp = new MessageModel("invite_result", inviter + "|" + type + "|" + invitee);
-        ClientHandler inviterH = MainServer.getClientHandlerByUserName(inviter);
-        ClientHandler inviteeH = MainServer.getClientHandlerByUserName(invitee);
-        if (inviterH != null) inviterH.sendMessage(resp);
-        if (inviteeH != null) inviteeH.sendMessage(resp);
     }
 
     private void startGameForUsers(String userA, String userB) throws IOException {

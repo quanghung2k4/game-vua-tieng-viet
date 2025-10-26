@@ -65,10 +65,10 @@ public class TCPClient {
                         dashBoardController.handleReceiveInvite(message);
                         break;
                     case "invite_error":
-                        dashBoardController.handleInviteErrorRespone(message);
+                        dashBoardController.handleInviteErrorResponse(message);
                         break;
                     case "invite_result":
-                        dashBoardController.handleInviteRespone(message);
+                        dashBoardController.handleInviteResponse(message);
                         break;
                     case "game_start":
                         if (dashBoardController != null && message.getData() instanceof GameStartDTO) {
