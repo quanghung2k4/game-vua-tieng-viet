@@ -81,10 +81,10 @@ public class RegisterController {
                 MessageModel request = new MessageModel("request_register", content);
                 
                 // Gửi request đến server
-                MessageModel response = (MessageModel) client.sendMessage(request);
+                 client.sendMessage(request);
                 
                 // Xử lý response
-                handleRegisterResponse(response, username);
+//                handleRegisterResponse(response, username);
                 
             } catch (Exception ex) {
                 // Xử lý lỗi kết nối

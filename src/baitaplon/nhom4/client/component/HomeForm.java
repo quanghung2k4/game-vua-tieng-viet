@@ -1,9 +1,11 @@
 package baitaplon.nhom4.client.component;
 
+import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.model.ModelProfile;
 import baitaplon.nhom4.client.model.PlayerData;
+import baitaplon.nhom4.client.swing.GlassPanePopup;
 import baitaplon.nhom4.client.table.EventAction;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
@@ -15,9 +17,11 @@ import java.util.List;
 public class HomeForm extends javax.swing.JPanel {
 
     private EventAction eventAction;
+    private DashBoardController controller;
 
     public HomeForm() {
         initComponents();
+        // tao thong bao
         table1.setShowGrid(false); // bỏ tất cả grid line
         initTableData();
         tableMouseListen();
@@ -45,11 +49,11 @@ public class HomeForm extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Tên", "Điểm", "Trạng thái"
+                "username", "Tên", "Điểm", "Trạng thái"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                true, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -60,9 +64,12 @@ public class HomeForm extends javax.swing.JPanel {
         table1.setUpdateSelectionOnSort(false);
         jScrollPane1.setViewportView(table1);
         if (table1.getColumnModel().getColumnCount() > 0) {
-            table1.getColumnModel().getColumn(0).setResizable(false);
+            table1.getColumnModel().getColumn(0).setMinWidth(0);
+            table1.getColumnModel().getColumn(0).setPreferredWidth(0);
+            table1.getColumnModel().getColumn(0).setMaxWidth(0);
             table1.getColumnModel().getColumn(1).setResizable(false);
             table1.getColumnModel().getColumn(2).setResizable(false);
+            table1.getColumnModel().getColumn(3).setResizable(false);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -106,18 +113,11 @@ public class HomeForm extends javax.swing.JPanel {
 
     private void initTableData() {
         table1.fixTable(jScrollPane1);
-        eventAction = new EventAction() {
-            @Override
-            public void invite(ModelPlayer player) {
-                GameScreen dashBoard = new GameScreen(player);
-                dashBoard.setVisible(true);
-            }
-        };
-        
+
         // Tạo dữ liệu demo ban đầu
         createFallbackPlayerList();
     }
-    
+
     /**
      * Cập nhật danh sách người chơi từ server
      */
@@ -125,14 +125,15 @@ public class HomeForm extends javax.swing.JPanel {
         // Xóa tất cả dữ liệu cũ
         DefaultTableModel model = (DefaultTableModel) table1.getModel();
         model.setRowCount(0);
-        
+
         // Thêm dữ liệu mới
         for (PlayerData playerData : playerList) {
             ModelPlayer player = new ModelPlayer(
-                resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),
-                playerData.getDisplayName(),
-                playerData.getTotalPoint(),
-                playerData.getStatus()
+                    playerData.getUsername(),
+                    resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),
+                    playerData.getDisplayName(),
+                    playerData.getTotalPoint(),
+                    playerData.getStatus()
             );
             table1.addRow((Object[]) player.toRowTable1(eventAction));
         }
@@ -141,14 +142,14 @@ public class HomeForm extends javax.swing.JPanel {
         table1.repaint();
         table1.revalidate();
     }
-    
+
     /**
      * Tạo danh sách người chơi demo khi không có dữ liệu từ server
      */
     private void createFallbackPlayerList() {
-        ModelPlayer x1 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony A", 20, "Online");
-        ModelPlayer x2 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony B", 15, "Busy");
-        ModelPlayer x3 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony C", 25, "Offline");
+        ModelPlayer x1 = new ModelPlayer("a",resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony A", 20, "Online");
+        ModelPlayer x2 = new ModelPlayer("b",resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony B", 15, "Busy");
+        ModelPlayer x3 = new ModelPlayer("c",resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25), "Jony C", 25, "Offline");
         table1.addRow((Object[]) x1.toRowTable1(eventAction));
         table1.addRow((Object[]) x2.toRowTable1(eventAction));
         table1.addRow((Object[]) x3.toRowTable1(eventAction));
@@ -162,10 +163,13 @@ public class HomeForm extends javax.swing.JPanel {
                 if (row >= 0) {
                     // duyệt tất cả cột để tìm ModelPlayer
                     int colCount = table1.getColumnCount();
-                  
-                    ModelProfile profile = (ModelProfile) table1.getValueAt(row, 0);
+
+                    ModelProfile profile = (ModelProfile) table1.getValueAt(row, 1);
                     ModelPlayer player;
-                    player = new ModelPlayer(profile.getIcon(),profile.getName(), (int)table1.getValueAt(row, 1),(String)table1.getValueAt(row,2));
+                    player = new ModelPlayer((String) table1.getValueAt(row, 0)
+                            ,profile.getIcon(), profile.getName()
+                            , (int) table1.getValueAt(row, 2)
+                            , (String) table1.getValueAt(row, 3));
                     if (player != null) {
                         // gọi invite
                         eventAction.invite(player);
@@ -182,4 +186,20 @@ public class HomeForm extends javax.swing.JPanel {
         Image newImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(newImg);
     }
+
+    public void setController(DashBoardController controller) {
+        this.controller = controller;
+         eventAction = new EventAction() {
+            @Override
+            public void invite(ModelPlayer player) {
+                if (controller != null) {
+                    controller.sendInvite(player);
+                } else {
+                    System.out.println("controller null");
+                }
+
+            }
+        };
+    }
+
 }

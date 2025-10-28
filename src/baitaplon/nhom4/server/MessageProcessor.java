@@ -30,6 +30,12 @@ public class MessageProcessor {
             case "request_player_list":
                 handleGetPlayers(message);
                 break;
+            case "request_invite_player":
+                handleInvitePlayer(message);
+                break;
+            case "response_invite":
+                handleResponseInvite(message);
+                break;
             default:
                 System.out.println("⚠️ Loại message chưa hỗ trợ: " + message.getType());
         }
@@ -37,6 +43,7 @@ public class MessageProcessor {
 
     private void handleLogin(MessageModel message) throws IOException {
         System.out.println("📩 Nhận yêu cầu login: " + message.getContent());
+
         String[] tmp = message.getContent().split("\\|");
         if (tmp.length < 2) {
             client.sendMessage(new MessageModel("return_login", "SAI_DINH_DANG"));
@@ -46,7 +53,15 @@ public class MessageProcessor {
         String username = tmp[0];
         String password = tmp[1];
         String result = userService.checkLogin(username, password);
+        System.out.println(result);
+        if (result.equals("OK")) {
+            User loggedInUser = userService.getUserByUserName(username);
+            // Gán user đó vào client hiện tại
+            client.setUser(loggedInUser);
+        }
+        System.out.println("sent");
         client.sendMessage(new MessageModel("return_login", result));
+        System.out.println("sented");
     }
 
     private void handleRegister(MessageModel message) throws IOException {
@@ -63,13 +78,78 @@ public class MessageProcessor {
     }
 
     private void handleGetPlayers(MessageModel message) throws IOException {
-        System.out.println("📩 Nhận yêu cầu lấy danh sách người chơi");
+//        System.out.println("📩 Nhận yêu cầu lấy danh sách người chơi");
         try {
             String playersData = userService.getAllPlayers();
             client.sendMessage(new MessageModel("return_get_players", playersData));
         } catch (Exception e) {
-            System.err.println("❌ Lỗi khi lấy danh sách người chơi: " + e.getMessage());
+            System.err.println("Lỗi khi lấy danh sách người chơi: " + e.getMessage());
             client.sendMessage(new MessageModel("return_player_list", "ERROR|Không thể lấy danh sách người chơi"));
+        }
+    }
+
+    private void handleInvitePlayer(MessageModel message) throws IOException {
+        try {
+            // content dạng: "senderUsername|receiverUsername"
+            String[] parts = message.getContent().split("\\|");
+            if (parts.length != 2) {
+                client.sendMessage(new MessageModel("invite_error", "Dữ liệu lời mời không hợp lệ."));
+                return;
+            }
+
+            String senderUsername = parts[0];
+            String receiverUsername = parts[1];
+
+            // Tìm người gửi & người nhận trong database
+            User sender = userService.getUserByUserName(senderUsername);
+            User receiver = userService.getUserByUserName(receiverUsername);
+            //Tìm client của người nhận (đang online)
+            ClientHandler receiverClient = MainServer.getClientHandlerByUserName(receiver.getUsername());
+            if(receiverClient == null) {
+                client.sendMessage(new MessageModel("invite_error", "Người chơi "+receiver.getDisplayName()+" không trực tuyến"));
+            }
+
+            System.out.println(receiverClient.getUser().getUsername() +" ");
+            // Gửi lời mời tới người nhận
+            MessageModel inviteMsg = new MessageModel();
+            inviteMsg.setType("receive_invite");
+            inviteMsg.setContent(sender.getUsername() +","+sender.getDisplayName()+ "|" + receiver.getUsername());
+
+            receiverClient.sendMessage(inviteMsg);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý lời mời: " + e.getMessage()));
+        }
+
+    }
+    private void handleResponseInvite(MessageModel message) throws IOException {
+        try {
+            String[] parts = message.getContent().split("\\|");
+            if (parts.length != 3) {
+                client.sendMessage(new MessageModel("invite_error", "Dữ liệu phản hồi không hợp lệ."));
+                return;
+            }
+
+            String senderUsername = parts[0];
+            String receiverUsername = parts[1];
+            String response = parts[2];
+            User receiver = userService.getUserByUserName(receiverUsername);
+            System.out.println(senderUsername+" "+receiverUsername);
+            ClientHandler senderClient = MainServer.getClientHandlerByUserName(senderUsername);
+            System.out.println("Gưi ve "+ senderClient.getUser().getUsername());
+            if (senderClient == null) {
+                client.sendMessage(new MessageModel("invite_error", "Người mời không còn trực tuyến."));
+                return;
+            }
+
+            MessageModel reply = new MessageModel();
+            reply.setType("invite_result");
+            reply.setContent(receiverUsername + "|" +receiver.getDisplayName()+"|"+ response);
+
+            senderClient.sendMessage(reply);
+        } catch (Exception e) {
+            e.printStackTrace();
+            client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý phản hồi lời mời: " + e.getMessage()));
         }
     }
 }

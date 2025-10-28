@@ -1,6 +1,7 @@
 
 package baitaplon.nhom4.client.controller;
 
+import baitaplon.nhom4.client.component.HomeForm;
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.view.Login;
@@ -23,7 +24,6 @@ public class LoginController {
         if (isLoggingIn) {
             return;
         }
-
         String username = view.getUsername();
         String password = view.getPassword();
 
@@ -65,10 +65,10 @@ public class LoginController {
                 MessageModel request = new MessageModel("request_login", content);
                 
                 // Gửi request đến server
-                MessageModel response = (MessageModel) client.sendMessage(request);
-                
+                client.sendMessage(request);
+
                 // Xử lý response
-                handleLoginResponse(response, username);
+//                handleLoginResponse(response, username);
                 
             } catch (Exception ex) {
                 // Xử lý lỗi kết nối
@@ -77,44 +77,9 @@ public class LoginController {
                 });
             } finally {
                 // Reset UI state
-                SwingUtilities.invokeLater(() -> {
-                    resetLoginState();
-                });
+                SwingUtilities.invokeLater(this::resetLoginState);
             }
         }).start();
-    }
-
-    private void handleLoginResponse(MessageModel response, String username) {
-        SwingUtilities.invokeLater(() -> {
-            if (response == null) {
-                view.showMessage("Không nhận được phản hồi từ server!");
-                return;
-            }
-
-            String responseContent = response.getContent();
-            System.out.println(responseContent);
-            
-            if ("OK".equals(responseContent)) {
-                // Đăng nhập thành công
-                view.showMessage("Đăng nhập thành công! Chào mừng " + username);
-                
-                // Chuyển đến màn hình chính (Dashboard)
-                openDashboard(username);
-                
-            } else if ("INVALID_CREDENTIALS".equals(responseContent)) {
-                view.showMessage("Tên đăng nhập hoặc mật khẩu không đúng!");
-                
-            } else if ("USER_ALREADY_ONLINE".equals(responseContent)) {
-                view.showMessage("Tài khoản này đã được đăng nhập ở nơi khác!");
-                
-            } else if ("SERVER_FULL".equals(responseContent)) {
-                view.showMessage("Server đang quá tải. Vui lòng thử lại sau!");
-                
-            } else {
-                // Hiển thị lỗi từ server
-                view.showMessage("Lỗi: " + responseContent);
-            }
-        });
     }
 
     private void handleConnectionError(Exception ex) {
@@ -128,6 +93,39 @@ public class LoginController {
         
         view.showMessage(errorMessage);
     }
+
+
+    public void handleLoginResponse(MessageModel response) {
+        SwingUtilities.invokeLater(() -> {
+            if (response == null) {
+                view.showMessage("Không nhận được phản hồi từ server!");
+                resetLoginState();
+                return;
+            }
+
+            String content = response.getContent();
+            System.out.println("Phản hồi login: " + content);
+
+            switch (content) {
+                case "OK":
+                    view.showMessage("Đăng nhập thành công!");
+                    openDashboard(view.getUsername());
+                    break;
+                case "INVALID_CREDENTIALS":
+                    view.showMessage("Sai tài khoản hoặc mật khẩu!");
+                    break;
+                case "USER_ALREADY_ONLINE":
+                    view.showMessage("Tài khoản đang đăng nhập ở nơi khác!");
+                    break;
+                default:
+                    view.showMessage("Lỗi: " + content);
+                    break;
+            }
+
+            resetLoginState();
+        });
+    }
+
 
     private void resetLoginState() {
         isLoggingIn = false;
@@ -147,7 +145,10 @@ public class LoginController {
     private void openDashboard(String username) {
         // Tạo Dashboard với username và client
         DashBoard dashboard = new DashBoard(username, client);
-        
+        DashBoardController dashBoardController = new DashBoardController(dashboard,client);
+        dashboard.setDashBoardController(dashBoardController);
+
+        client.setDashBoardController(dashBoardController);
         // Set title cho window
         dashboard.setTitleWithUsername();
         

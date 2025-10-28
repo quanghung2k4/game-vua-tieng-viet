@@ -31,7 +31,7 @@ public class Table extends JTable{
                     Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 TableHeader header = new TableHeader(value+"");
           
-                if(column == 1 || column == 2){
+                if(column == 2 || column == 3){
                     header.setHorizontalAlignment(JLabel.CENTER);
                 } else {
                     header.setHorizontalAlignment(JLabel.LEFT);
@@ -47,7 +47,7 @@ public class Table extends JTable{
                 
                 Component com = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                
-                if(column == 1|| column == 2){
+                if(column == 2|| column == 3){
                      
                     setHorizontalAlignment(JLabel.CENTER);   // căn giữa cột 2
                 }
@@ -74,8 +74,6 @@ public class Table extends JTable{
                     }
                     return cell;
                 } else {
-                    
-                    
                     setBorder(noFocusBorder);
                     if(isSelected){
                         com.setBackground(new Color(239,244,255));

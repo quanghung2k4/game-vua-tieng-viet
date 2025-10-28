@@ -6,6 +6,8 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 public class ModelPlayer {
+    int id;
+    String username;
     Icon icon;
     String name;
     int score;
@@ -17,7 +19,8 @@ public class ModelPlayer {
     public ModelPlayer() {
     }
 
-    public ModelPlayer(Icon icon, String name, int score, String status) {
+    public ModelPlayer(String username,Icon icon, String name, int score, String status) {
+        this.username = username;
         this.icon = icon;
         this.name = name;
         this.score = score;
@@ -25,6 +28,7 @@ public class ModelPlayer {
     }
 
     public ModelPlayer(Icon icon, String name,long numOfVictory,int rank) {
+
         this.icon = icon;
         this.name = name;
         this.numOfVictory = numOfVictory;
@@ -37,9 +41,17 @@ public class ModelPlayer {
         this.score = score;
         this.rank = rank;
     }
-    
-    
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    
+    
     public Icon getIcon() {
         return icon;
     }
@@ -72,7 +84,7 @@ public class ModelPlayer {
         this.status = status;
     }
     public Object toRowTable1(EventAction event){
-        return new Object[]{new ModelProfile(icon,name),score,status};
+        return new Object[]{username,new ModelProfile(icon,name),score,status};
     }
     public Object toRowTable2(EventAction event){
         return new Object[]{new ModelProfile(icon,name),numOfVictory,rank};
