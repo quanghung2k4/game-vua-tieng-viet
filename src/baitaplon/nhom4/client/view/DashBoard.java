@@ -135,6 +135,7 @@ public class DashBoard extends javax.swing.JFrame {
         if (client != null) {
             if (leaderboardController == null) {
                 leaderboardController = new LeaderboardController(leaderboardForm, client);
+                client.setLeaderboardController(leaderboardController);
             }
             leaderboardController.loadLeaderboard();
         }
@@ -173,10 +174,8 @@ public class DashBoard extends javax.swing.JFrame {
             new Thread(() -> {
                 try {
                     MessageModel request = new MessageModel("request_logout", username);
-                    MessageModel response = (MessageModel) client.sendMessage(request);
-                    if (response != null && "return_logout".equals(response.getType())) {
-                        System.out.println("Đăng xuất thành công: " + response.getContent());
-                    }
+                    client.sendMessage(request);
+                    System.out.println("Đã gửi request logout cho user: " + username);
                 } catch (Exception ex) {
                     System.err.println("Lỗi khi gửi request logout: " + ex.getMessage());
                 }
