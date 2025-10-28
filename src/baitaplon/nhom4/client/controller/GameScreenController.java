@@ -7,10 +7,9 @@ import baitaplon.nhom4.shared.game.WordChallengeDTO;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GameScreenController {
 
@@ -22,8 +21,8 @@ public class GameScreenController {
 
     private final Deque<WordChallengeDTO> queue = new ArrayDeque<>(64);
     private WordChallengeDTO current;
-    private final List<String> selectedLetters = new ArrayList<>();
-    private final List<JButton> letterButtons = new ArrayList<>();
+    private final java.util.List<String> selectedLetters = new java.util.ArrayList<>();
+    private final java.util.List<JButton> letterButtons = new java.util.ArrayList<>();
 
     public GameScreenController(TCPClient tcpClient) {
         this.tcpClient = tcpClient;
@@ -59,10 +58,17 @@ public class GameScreenController {
         CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(this::nextWord));
     }
 
+    // Chuẩn hóa: bỏ hết khoảng trắng, lower-case (xử lý cụm từ có dấu cách)
+    private String normalizeNoSpace(String s) {
+        if (s == null) return "";
+        return s.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
+    }
+
     public boolean checkAnswer() {
         if (current == null) return false;
-        String ans = String.join("", selectedLetters).trim().toLowerCase();
-        return ans.equals(current.getOriginalWord().trim().toLowerCase());
+        String ans = normalizeNoSpace(String.join("", selectedLetters));
+        String target = normalizeNoSpace(current.getOriginalWord());
+        return ans.equals(target);
     }
 
     // Dọn ngay dòng đã sắp xếp
@@ -71,6 +77,12 @@ public class GameScreenController {
         selectedLettersPanel.removeAll();
         selectedLettersPanel.revalidate();
         selectedLettersPanel.repaint();
+
+        // Kích hoạt lại toàn bộ nút chữ cái (phòng khi người chơi dựng sai trước đó)
+        for (JButton btn : letterButtons) {
+            btn.setEnabled(true);
+            btn.setBackground(new Color(0, 255, 255));
+        }
     }
 
     public void nextWord() {
@@ -87,7 +99,13 @@ public class GameScreenController {
         shuffledLettersPanel.removeAll();
         letterButtons.clear();
 
-        for (String letter : current.getShuffledLetters()) {
+        // Bỏ khoảng trắng trong danh sách hiển thị ở hàng dưới
+        java.util.List<String> letters = current.getShuffledLetters()
+                .stream()
+                .filter(ch -> ch != null && !ch.trim().isEmpty())
+                .collect(Collectors.toList());
+
+        for (String letter : letters) {
             JButton btn = makeLetterButton(letter);
             btn.addActionListener(e -> {
                 if (btn.isEnabled()) {

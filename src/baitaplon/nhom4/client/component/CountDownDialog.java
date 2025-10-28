@@ -17,7 +17,7 @@ public class CountDownDialog extends JDialog {
         label.setForeground(Color.WHITE);
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(0, 0, 0, 180));
+        panel.setBackground(new Color(0, 0, 0, 255));
         panel.add(label, BorderLayout.CENTER);
         setContentPane(panel);
     }

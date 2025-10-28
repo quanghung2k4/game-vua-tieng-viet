@@ -56,6 +56,20 @@ public class MessageProcessor {
                 }
                 break;
             }
+            case "game_word_correct": {
+                // content: "scorerUsername|opponentUsername"
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                String scorer = parts.length > 0 ? parts[0] : null;
+                String opponent = parts.length > 1 ? parts[1] : null;
+                if (opponent != null) {
+                    ClientHandler opp = MainServer.getClientHandlerByUserName(opponent);
+                    if (opp != null) {
+                        MessageModel notify = new MessageModel("opponent_scored", scorer);
+                        opp.sendMessage(notify);
+                    }
+                }
+                break;
+            }
             case "game_forfeit": {
                 // content: "loserUsername|opponentUsername" (opponent optional)
                 String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
