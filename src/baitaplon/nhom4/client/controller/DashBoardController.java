@@ -102,8 +102,9 @@ public class DashBoardController {
             }
 
             String responseContent = response.getContent();
-//            System.out.println("Server response: " + responseContent);
-
+            System.out.println("Server response: " + responseContent);
+            
+            if (response.getType().equals("return_player_list")) {
                 try {
 
                     // Parse string response thành danh sách PlayerData

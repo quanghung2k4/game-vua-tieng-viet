@@ -16,10 +16,6 @@ public class TCPClient {
     private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
-    private boolean running = false;
-
-    private DashBoardController dashBoardController;
-    private LoginController loginController;
 
     public TCPClient(String host, int port) throws IOException {
         this.host = host;
@@ -44,60 +40,43 @@ public class TCPClient {
         out.flush();
     }
 
-    private void listenServer() {
-        try {
-            while (running) {
-                MessageModel message = (MessageModel) in.readObject();
-                System.out.println("Nhan duoc "+message.getType());
-                switch (message.getType()){
-                    case "return_login":
-                        loginController.handleLoginResponse(message);
-                        break;
-                    case "return_get_players":
-                        dashBoardController.handlePlayerListResponse(message);
-                        break;
-                    case "receive_invite":
-                        dashBoardController.handleReceiveInvite(message);
-                        break;
-                    case "invite_error":
-                        dashBoardController.handleInviteRespone(message);
-                        break;
-                    case "invite_result":
-                        dashBoardController.handleInviteRespone(message);
-                        break;
-
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Mất kết nối tới server: " + e.getMessage());
-            running = false;
+    public synchronized void connect() throws IOException {
+        if (socket != null && socket.isConnected() && !socket.isClosed()) {
+            return;
         }
+        socket = new Socket(host, port);
+        socket.setTcpNoDelay(true);
+        socket.setKeepAlive(true);
+        out = new ObjectOutputStream(socket.getOutputStream());
+        out.flush();
+        in = new ObjectInputStream(socket.getInputStream());
     }
 
-
-    public void setDashBoardController(DashBoardController dashBoardController) {
-        this.dashBoardController = dashBoardController;
-    }
-    public void setLoginController(LoginController loginController){
-        this.loginController = loginController;
-    }
-
-
-
-    public void disconnect() {
-        running = false;
-        try {
-            if (in != null) {
-                in.close();
-            }
-            if (out != null) {
-                out.close();
-            }
-            if (socket != null) {
-                socket.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public synchronized Object sendMessage(MessageModel message) throws IOException, ClassNotFoundException {
+        if (socket == null || socket.isClosed() || !socket.isConnected()) {
+            connect();
         }
+        out.writeObject(message);
+        out.flush();
+        return in.readObject();
+    }
+
+    public synchronized boolean isConnected() {
+        return socket != null && socket.isConnected() && !socket.isClosed();
+    }
+
+    public synchronized void close() {
+        try {
+            if (in != null) in.close();
+        } catch (IOException ignored) {}
+        try {
+            if (out != null) out.close();
+        } catch (IOException ignored) {}
+        try {
+            if (socket != null) socket.close();
+        } catch (IOException ignored) {}
+        in = null;
+        out = null;
+        socket = null;
     }
 }
