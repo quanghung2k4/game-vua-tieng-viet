@@ -79,6 +79,10 @@ public class MessageProcessor {
         String username = tmp[0];
         String password = tmp[1];
         String result = userService.checkLogin(username, password);
+        if (result.equals("OK")) {
+            User loggedInUser = userService.getUserByUserName(username);
+            client.setUser(loggedInUser);
+        }
         client.sendMessage(new MessageModel("return_login", result));
     }
 
@@ -96,7 +100,7 @@ public class MessageProcessor {
     }
 
     private void handleGetPlayers(MessageModel message) throws IOException {
-        System.out.println("📩 Nhận yêu cầu lấy danh sách người chơi");
+//        System.out.println("📩 Nhận yêu cầu lấy danh sách người chơi");
         try {
             String playersData = userService.getAllPlayers();
             client.sendMessage(new MessageModel("return_get_players", playersData));
@@ -187,7 +191,7 @@ public class MessageProcessor {
             reply.setType("invite_result");
             // format: receiverUsername|receiverDisplayName|response
             User receiver = userService.getUserByUserName(receiverUsername);
-            reply.setContent(receiverUsername + "|" + receiver.getDisplayName() + "|" + response);
+            reply.setContent(senderUsername + "|" + receiverUsername + "|" + receiver.getDisplayName() + "|" + response);
 
             senderClient.sendMessage(reply);
 
@@ -205,6 +209,7 @@ public class MessageProcessor {
         long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
         WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
 
+        System.out.println(userA+" "+userB);
         User user1 = userService.getUserByUserName(userA);
         User user2 = userService.getUserByUserName(userB);
 

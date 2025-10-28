@@ -34,13 +34,15 @@ public class GameScreenController {
 
         selectedLettersPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         selectedLettersPanel.setOpaque(false);
+
         shuffledLettersPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         shuffledLettersPanel.setOpaque(false);
 
+        // Vị trí: hàng sắp xếp (trên), hàng lựa chọn (dưới)
         layeredPane.add(selectedLettersPanel,
-                new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 250, 700, 80));
+                new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 250, 800, 80));
         layeredPane.add(shuffledLettersPanel,
-                new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 370, 700, 80));
+                new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 370, 800, 80));
         layeredPane.setLayer(selectedLettersPanel, JLayeredPane.PALETTE_LAYER);
         layeredPane.setLayer(shuffledLettersPanel, JLayeredPane.PALETTE_LAYER);
     }
@@ -63,16 +65,22 @@ public class GameScreenController {
         return ans.equals(current.getOriginalWord().trim().toLowerCase());
     }
 
+    // Dọn ngay dòng đã sắp xếp
+    public void clearSelectedLetters() {
+        selectedLetters.clear();
+        selectedLettersPanel.removeAll();
+        selectedLettersPanel.revalidate();
+        selectedLettersPanel.repaint();
+    }
+
     public void nextWord() {
         if (queue.isEmpty()) {
-            // hết batch (có thể yêu cầu server gửi thêm nếu muốn)
             JOptionPane.showMessageDialog(layeredPane, "Hết câu hỏi!");
             return;
         }
         current = queue.pollFirst();
-        selectedLetters.clear();
+        clearSelectedLetters();
         renderShuffledLetters();
-        renderSelectedLetters();
     }
 
     private void renderShuffledLetters() {
