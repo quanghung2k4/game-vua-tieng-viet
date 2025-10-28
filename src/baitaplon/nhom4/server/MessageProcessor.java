@@ -4,6 +4,8 @@ import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.server.model.User;
 import baitaplon.nhom4.server.service.UserService;
 import baitaplon.nhom4.server.service.LeaderboardService;
+import baitaplon.nhom4.shared.game.GameStartDTO;
+import baitaplon.nhom4.shared.game.WordBatchDTO;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -39,6 +41,28 @@ public class MessageProcessor {
             case "request_logout":
                 handleLogout(message);
                 break;
+            case "request_invite_player":
+                handleInvitePlayer(message);
+                break;
+            case "response_invite":
+                handleResponseInvite(message);
+                break;
+            case "invite_accept": {
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                if (parts.length >= 2) {
+                    String inviter = parts[0];
+                    String invitee = parts[1];
+                    startGameForUsers(inviter, invitee);
+                }
+                break;
+            }
+            case "game_forfeit": {
+                // content: "loserUsername|opponentUsername" (opponent optional)
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
+                GameSessionManager.forfeit(loser);
+                break;
+            }
             default:
                 System.out.println("⚠️ Loại message chưa hỗ trợ: " + message.getType());
         }
@@ -109,5 +133,94 @@ public class MessageProcessor {
         if ("OK".equals(result)) {
             System.out.println("✅ User " + username + " đã logout thành công");
         }
+    }
+
+    private void handleInvitePlayer(MessageModel message) throws IOException {
+        try {
+            String[] parts = message.getContent().split("\\|");
+            if (parts.length != 2) {
+                client.sendMessage(new MessageModel("invite_error", "Dữ liệu lời mời không hợp lệ."));
+                return;
+            }
+
+            String senderUsername = parts[0];
+            String receiverUsername = parts[1];
+
+            User sender = userService.getUserByUserName(senderUsername);
+            User receiver = userService.getUserByUserName(receiverUsername);
+
+            ClientHandler receiverClient = MainServer.getClientHandlerByUserName(receiver.getUsername());
+            if (receiverClient == null) {
+                client.sendMessage(new MessageModel("invite_error", "Người chơi " + receiver.getDisplayName() + " không trực tuyến"));
+                return;
+            }
+
+            MessageModel inviteMsg = new MessageModel();
+            inviteMsg.setType("receive_invite");
+            inviteMsg.setContent(sender.getUsername() + "," + sender.getDisplayName() + "|" + receiver.getUsername());
+            receiverClient.sendMessage(inviteMsg);
+        } catch (Exception e) {
+            client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý lời mời: " + e.getMessage()));
+        }
+    }
+
+    private void handleResponseInvite(MessageModel message) throws IOException {
+        try {
+            String[] parts = message.getContent().split("\\|");
+            if (parts.length != 3) {
+                client.sendMessage(new MessageModel("invite_error", "Dữ liệu phản hồi không hợp lệ."));
+                return;
+            }
+
+            String senderUsername = parts[0];
+            String receiverUsername = parts[1];
+            String response = parts[2];
+
+            ClientHandler senderClient = MainServer.getClientHandlerByUserName(senderUsername);
+            if (senderClient == null) {
+                client.sendMessage(new MessageModel("invite_error", "Người mời không còn trực tuyến."));
+                return;
+            }
+
+            // Giữ behavior cũ để client cũ vẫn hiển thị
+            MessageModel reply = new MessageModel();
+            reply.setType("invite_result");
+            // format: receiverUsername|receiverDisplayName|response
+            User receiver = userService.getUserByUserName(receiverUsername);
+            reply.setContent(receiverUsername + "|" + receiver.getDisplayName() + "|" + response);
+
+            senderClient.sendMessage(reply);
+
+            // Nếu đồng ý, khởi tạo ván đấu luôn (đảm bảo không cần thông báo "đã chấp nhận")
+            if ("respone_accept".equals(response)) {
+                startGameForUsers(senderUsername, receiverUsername);
+            }
+
+        } catch (Exception e) {
+            client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý phản hồi lời mời: " + e.getMessage()));
+        }
+    }
+
+    private void startGameForUsers(String userA, String userB) throws IOException {
+        long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
+        WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
+
+        User user1 = userService.getUserByUserName(userA);
+        User user2 = userService.getUserByUserName(userB);
+
+        GameStartDTO dtoAB = new GameStartDTO(userA, userB, user1.getDisplayName(), user2.getDisplayName(), batch, startAt, 3);
+        GameStartDTO dtoBA = new GameStartDTO(userB, userA, user2.getDisplayName(), user1.getDisplayName(), batch, startAt, 3);
+
+        MessageModel startA = new MessageModel("game_start", dtoAB);
+        MessageModel startB = new MessageModel("game_start", dtoBA);
+
+        ClientHandler hA = MainServer.getClientHandlerByUserName(userA);
+        ClientHandler hB = MainServer.getClientHandlerByUserName(userB);
+
+        if (hA != null) hA.sendMessage(startA);
+        if (hB != null) hB.sendMessage(startB);
+
+        // Đăng ký cặp đang thi đấu để xử lý thoát/mất kết nối
+        GameSessionManager.registerPair(userA, userB);
     }
 }
