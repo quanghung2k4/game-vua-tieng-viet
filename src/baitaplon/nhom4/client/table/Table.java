@@ -62,7 +62,7 @@ public class Table extends JTable{
                     } else if("Offline".equalsIgnoreCase(status)){
                         com.setForeground(new Color(255, 0, 0)); // đỏ tươi (red)
                     } else {
-                        com.setForeground(new Color(255, 165, 0)); // cam (orange) cho các trạng thái khác
+                        com.setForeground(new Color(102,102,102)); // cam (orange) cho các trạng thái khác
                     }
                 } else {
                     // Các cột khác dùng màu xám
