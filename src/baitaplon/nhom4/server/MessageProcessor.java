@@ -75,7 +75,7 @@ public class MessageProcessor {
         System.out.println("📩 Nhận yêu cầu lấy danh sách người chơi");
         try {
             String playersData = userService.getAllPlayers();
-            client.sendMessage(new MessageModel("return_get_players", playersData));
+            client.sendMessage(new MessageModel("return_player_list", playersData));
         } catch (Exception e) {
             System.err.println("❌ Lỗi khi lấy danh sách người chơi: " + e.getMessage());
             client.sendMessage(new MessageModel("return_player_list", "ERROR|Không thể lấy danh sách người chơi"));
