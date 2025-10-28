@@ -13,7 +13,7 @@ public class GameScreen extends javax.swing.JFrame {
 
     private Thread countDownThread;
     private int time;
-    private static ModelPlayer player;
+    private static ModelPlayer player = new ModelPlayer();
 
     public GameScreen(ModelPlayer player) {
         this.player = player;
