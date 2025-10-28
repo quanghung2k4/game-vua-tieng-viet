@@ -2,6 +2,7 @@ package baitaplon.nhom4.client.controller;
 
 import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.component.CountDownDialog;
+import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.shared.game.WordBatchDTO;
 import baitaplon.nhom4.shared.game.WordChallengeDTO;
 
@@ -23,8 +24,10 @@ public class GameScreenController {
     private WordChallengeDTO current;
     private final java.util.List<String> selectedLetters = new java.util.ArrayList<>();
     private final java.util.List<JButton> letterButtons = new java.util.ArrayList<>();
+    private GameScreen gameScreen;
 
-    public GameScreenController(TCPClient tcpClient) {
+    public GameScreenController(TCPClient tcpClient, GameScreen gameScreen) {
+        this.gameScreen = gameScreen;
         this.tcpClient = tcpClient;
     }
 
@@ -55,10 +58,12 @@ public class GameScreenController {
         int seconds = (int)Math.ceil(msLeft / 1000.0);
         if (seconds <= 0) seconds = Math.max(1, fallbackSeconds);
 
-        CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(this::nextWord));
+        CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(() -> {
+            gameScreen.countDown(120);
+            nextWord();
+        }));
     }
 
-    // Chuẩn hóa: bỏ hết khoảng trắng, lower-case (xử lý cụm từ có dấu cách)
     private String normalizeNoSpace(String s) {
         if (s == null) return "";
         return s.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
@@ -90,7 +95,9 @@ public class GameScreenController {
             JOptionPane.showMessageDialog(layeredPane, "Hết câu hỏi!");
             return;
         }
+        System.out.print(queue.peekFirst().getOriginalWord() + " ");
         current = queue.pollFirst();
+        System.out.print(queue.peekFirst().getOriginalWord() + " ");
         clearSelectedLetters();
         renderShuffledLetters();
     }

@@ -38,8 +38,6 @@ public class GameScreen extends javax.swing.JFrame {
             }
         });
 
-        // Timer tổng
-        countDown(120);
     }
 
     public GameScreen() {
@@ -57,7 +55,7 @@ public class GameScreen extends javax.swing.JFrame {
     }
 
     private void initController() {
-        controller = new GameScreenController(tcpClient);
+        controller = new GameScreenController(tcpClient, this);
         controller.attachTo(jLayeredPane1);
     }
 
@@ -140,23 +138,33 @@ public class GameScreen extends javax.swing.JFrame {
     }
 
     private void showPlusOneUnder(JLabel scoreLabel) {
+        final int w = 40, h = 22;
+
         if (plusOneLabel == null) {
             plusOneLabel = new JLabel("+1", SwingConstants.CENTER);
             plusOneLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
             plusOneLabel.setForeground(new Color(0, 255, 0));
             plusOneLabel.setOpaque(false);
-            jLayeredPane1.add(plusOneLabel, JLayeredPane.POPUP_LAYER);
+            jLayeredPane1.add(plusOneLabel,
+                    new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, w, h));
+            jLayeredPane1.setLayer(plusOneLabel, JLayeredPane.POPUP_LAYER);
         }
-        // Vị trí ngay dưới ô điểm
-        Point p = SwingUtilities.convertPoint(scoreLabel.getParent(), scoreLabel.getLocation(), jLayeredPane1);
-        int x = p.x + (scoreLabel.getWidth() / 2) - 10;
+        // Tính vị trí ngay dưới ô điểm
+        Point p = SwingUtilities.convertPoint(scoreLabel.getParent(),
+                scoreLabel.getLocation(),
+                jLayeredPane1);
+        int x = p.x + (scoreLabel.getWidth() / 2) - (w / 2);
         int y = p.y + scoreLabel.getHeight() + 6;
-        plusOneLabel.setBounds(x, y, 40, 22);
+
+        plusOneLabel.setBounds(x, y, w, h);
         plusOneLabel.setVisible(true);
 
         Timer t = new Timer(900, e -> plusOneLabel.setVisible(false));
         t.setRepeats(false);
         t.start();
+
+        jLayeredPane1.revalidate();
+        jLayeredPane1.repaint();
     }
 
     @SuppressWarnings("unchecked")
@@ -216,7 +224,7 @@ public class GameScreen extends javax.swing.JFrame {
 
         timeDown.setFont(new java.awt.Font("SansSerif", 1, 18));
         timeDown.setForeground(new java.awt.Color(255, 255, 255));
-        timeDown.setText("0:30");
+        timeDown.setText("02:00");
 
         myName.setFont(new java.awt.Font("SansSerif", 1, 14));
         myName.setForeground(new java.awt.Color(51, 51, 51));
@@ -335,7 +343,7 @@ public class GameScreen extends javax.swing.JFrame {
         }
     }
 
-    private void countDown(int t) {
+    public void countDown(int t) {
         this.time = t;
         countDownThread = new Thread(() -> {
             while (time >= 0) {
