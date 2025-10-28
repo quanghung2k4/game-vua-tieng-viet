@@ -102,22 +102,21 @@ public class DashBoardController {
             }
 
             String responseContent = response.getContent();
-            System.out.println("Server response: " + responseContent);
-            
-            if (response.getType().equals("return_player_list")) {
-                try {
+//            System.out.println("Server response: " + responseContent);
 
-                    // Parse string response thành danh sách PlayerData
-                    List<PlayerData> playerList = parsePlayerListFromString(responseContent);
+            try {
 
-                    // Cập nhật UI với danh sách mới
-                    updatePlayerListUI(playerList);
+                // Parse string response thành danh sách PlayerData
+                List<PlayerData> playerList = parsePlayerListFromString(responseContent);
 
-                } catch (Exception e) {
-                    System.err.println("Lỗi parse string: " + e.getMessage());
-                    // Fallback: tạo dữ liệu demo nếu parse lỗi
-                    createFallbackPlayerList();
-                }
+                // Cập nhật UI với danh sách mới
+                updatePlayerListUI(playerList);
+
+            } catch (Exception e) {
+                System.err.println("Lỗi parse string: " + e.getMessage());
+                // Fallback: tạo dữ liệu demo nếu parse lỗi
+                createFallbackPlayerList();
+            }
 
         });
     }
@@ -205,8 +204,8 @@ public class DashBoardController {
         new Thread(() -> {
             try {
 //             Gửi yêu cầu mời người chơi
-            MessageModel request = new MessageModel("request_invite_player", view.getUsername()+"|"+player.getUsername());
-            client.sendMessage(request);
+                MessageModel request = new MessageModel("request_invite_player", view.getUsername()+"|"+player.getUsername());
+                client.sendMessage(request);
 
             } catch (Exception ex) {
                 SwingUtilities.invokeLater(()
