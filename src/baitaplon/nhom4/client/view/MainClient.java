@@ -16,6 +16,13 @@ public class MainClient {
         
         // Tạo TCPClient một lần duy nhất và tái sử dụng
         TCPClient client = new TCPClient("26.244.192.199", 3636);
+        try {
+            client.connect();
+        } catch (Exception e) {
+            System.err.println("Không thể kết nối đến server: " + e.getMessage());
+        }
+        // Đảm bảo đóng kết nối khi ứng dụng thoát
+        Runtime.getRuntime().addShutdownHook(new Thread(client::close));
         
         // Tạo Login form với client
         Login login = new Login(client);
