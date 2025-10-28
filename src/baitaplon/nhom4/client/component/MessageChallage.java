@@ -128,8 +128,8 @@ public class MessageChallage extends javax.swing.JPanel {
     private void btnAcceptMouseClicked(java.awt.event.MouseEvent evt)  {//GEN-FIRST:event_btnAcceptMouseClicked
         GlassPanePopup.closePopupLast();
         try{
-            System.out.println(userNameSender + "|" + userNameReciever + "|respone_accept");
-            client.sendMessage(new MessageModel("response_invite", userNameSender + "|" + userNameReciever + "|respone_accept"));
+            System.out.println(userNameSender + "|" + userNameReciever + "|response_accept");
+            client.sendMessage(new MessageModel("response_invite", userNameSender + "|" + userNameReciever + "|response_accept"));
         } catch (Exception e){
 
         }
@@ -139,7 +139,7 @@ public class MessageChallage extends javax.swing.JPanel {
         // TODO add your handling code here:
         GlassPanePopup.closePopupLast();
         try {
-            client.sendMessage(new MessageModel("response_invite", userNameSender + "|" + userNameReciever + "|respone_reject"));
+            client.sendMessage(new MessageModel("response_invite", userNameSender + "|" + userNameReciever + "|response_reject"));
         } catch (Exception e){
 
         }

@@ -8,6 +8,8 @@ import baitaplon.nhom4.client.component.HomeForm;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.swing.GlassPanePopup;
 import baitaplon.nhom4.client.view.GameScreen;
+import baitaplon.nhom4.shared.game.GameStartDTO;
+
 import javax.swing.SwingUtilities;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +24,17 @@ public class DashBoardController {
     private final DashBoard view;
     private final TCPClient client;
     private HomeForm homeForm;
+    private GameScreen currentGameScreen;
     private Timer refreshTimer;
     private boolean isRunning = false;
-
+    private String username;
     private ModelPlayer opponentPlayer;
 
-    public DashBoardController(DashBoard view, TCPClient client){
+    public DashBoardController(String username, DashBoard view, TCPClient client){
         this.view = view;
         this.client = client;
+        this.username = username;
     }
-
-
 
     /**
      * Bắt đầu lấy danh sách người chơi và cập nhật định kỳ
@@ -215,24 +217,35 @@ public class DashBoardController {
         }).start();
     }
 
-    public void handleInviteRespone(MessageModel message){
-        SwingUtilities.invokeLater(() -> {
-            String [] parse = message.getContent().split("\\|");
-            String opponentName = parse[1];
-            String respone = parse[2];
-            switch (respone) {
-                case "respone_accept":
-                    GlassPanePopup.closePopupLast();
-                    view.showMessageInvite(opponentName + " đã chấp nhận");
-                    break;
-                case "respone_reject":
-                    GlassPanePopup.closePopupLast();
-                    view.showMessageInvite(opponentName + " đã từ chối lời mời.");
+    public void handleInviteErrorResponse(MessageModel message){
+        System.out.println(message.getContent());
+    }
 
-                    break;
-                default:
-                    view.showMessageInvite(message.getContent());
-                    break;
+    public void handleInviteResponse(MessageModel message){
+        SwingUtilities.invokeLater(() -> {
+            try{
+                String [] parse = message.getContent().split("\\|");
+                String inviter = parse[0];
+                String invitee = parse[1];
+                String inviteeName = parse[2];
+                String response = parse[3];
+                System.out.println(response);
+                switch (response) {
+                    case "response_accept":
+                        GlassPanePopup.closePopupLast();
+                        client.sendMessage(new MessageModel("invite_accept", inviter + "|" + invitee));
+                        view.showMessageInvite(inviteeName + " đã chấp nhận. Đang bắt đầu trò chơi..."); // optional
+                        break;
+                    case "response_reject":
+                        GlassPanePopup.closePopupLast();
+                        view.showMessageInvite(inviteeName + " đã từ chối lời mời.");
+                        break;
+                    default:
+                        view.showMessageInvite(message.getContent());
+                        break;
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -267,6 +280,22 @@ public class DashBoardController {
         }
 
         updatePlayerListUI(fallbackList);
+    }
+
+    public void handleGameStart(GameStartDTO dto) {
+        SwingUtilities.invokeLater(() -> {
+            // Mở GameScreen (nếu chưa mở), truyền tcp client để controller có thể lắng nghe thêm
+            if (currentGameScreen == null) {
+                currentGameScreen = new GameScreen(client);
+                currentGameScreen.setLocationRelativeTo(null);
+                currentGameScreen.setVisible(true);
+            }
+            // Forward DTO để GameScreen bắt đầu countdown và hiển thị batch
+            currentGameScreen.startGame(dto);
+
+            // Ẩn dashboard
+            if (view != null) view.setVisible(false);
+        });
     }
 
     public void setHomeForm(HomeForm homeForm) {
