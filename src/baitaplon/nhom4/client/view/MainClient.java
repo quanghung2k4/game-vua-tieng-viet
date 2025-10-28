@@ -3,6 +3,7 @@ package baitaplon.nhom4.client.view;
 
 import baitaplon.nhom4.client.controller.LoginController;
 import baitaplon.nhom4.client.network.TCPClient;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -10,16 +11,24 @@ import java.net.Socket;
  * @author ADMIN
  */
 public class MainClient {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Set Look and Feel cho toàn bộ ứng dụng
         setLookAndFeel();
         
         // Tạo TCPClient một lần duy nhất và tái sử dụng
-        TCPClient client = new TCPClient("26.246.150.145", 3636);
+        TCPClient client = new TCPClient("26.244.192.199", 3636);
+        try {
+            client.connect();
+        } catch (Exception e) {
+            System.err.println("Không thể kết nối đến server: " + e.getMessage());
+        }
+        // Đảm bảo đóng kết nối khi ứng dụng thoát
+        Runtime.getRuntime().addShutdownHook(new Thread(client::close));
         
         // Tạo Login form với client
         Login login = new Login(client);
-        new LoginController(login, client);
+        LoginController loginController = new LoginController(login, client);
+        client.setLoginController(loginController);
         login.setVisible(true);
     }
     

@@ -6,17 +6,51 @@ import java.io.Serializable;
  * Model chứa thông tin người chơi từ server
  */
 public class PlayerData implements Serializable {
+    private int id;
+    private String username;
     private String displayName;
     private String status;
     private int totalPoint;
     
     public PlayerData() {
     }
+
+     public PlayerData(String username,String displayName, String status, int totalPoint) {
+        this.username = username;
+        this.displayName = displayName;
+        this.status = status;
+        this.totalPoint = totalPoint;
+    }
+
+    
+    public PlayerData(int id,String displayName, String status, int totalPoint) {
+        this.id = id;
+        this.displayName = displayName;
+        this.status = status;
+        this.totalPoint = totalPoint;
+    }
+
+    
     
     public PlayerData(String displayName, String status, int totalPoint) {
         this.displayName = displayName;
         this.status = status;
         this.totalPoint = totalPoint;
+    }
+    
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
     
     public String getDisplayName() {
