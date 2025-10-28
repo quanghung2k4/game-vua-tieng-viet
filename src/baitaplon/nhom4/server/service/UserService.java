@@ -14,7 +14,7 @@ public class UserService {
 
     public String checkLogin(String username, String plaintextPassword) {
         String sql = "SELECT password FROM users WHERE username = ?";
-        String updateStatusSql = "UPDATE users SET status = 'online' WHERE username = ?";
+        String updateStatusSql = "UPDATE users SET status = 'Online' WHERE username = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
@@ -35,10 +35,32 @@ public class UserService {
                     return "SAI_MAT_KHAU";
                 }
             } else {
-                return "KHONG_TON_TAI";
+                return "USERNAME KHONG TON TAI";
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
+            return "LOI_DB";
+        }
+    }
+
+    public String logout(String username) {
+        String updateStatusSql = "UPDATE users SET status = 'Offline' WHERE username = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(updateStatusSql)) {
+            ps.setString(1, username);
+            int rowsAffected = ps.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("✅ User " + username + " đã logout thành công");
+                return "OK";
+            } else {
+                System.err.println("⚠️ Không tìm thấy user " + username + " để logout");
+                return "USER NOT FOUND";
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Lỗi khi logout user " + username + ": " + e.getMessage());
             e.printStackTrace();
             return "LOI_DB";
         }
@@ -57,14 +79,24 @@ public class UserService {
             checkPs.setString(1, username);
             ResultSet rs = checkPs.executeQuery();
             if (rs.next()) {
-                return "USERNAME_DA_TON_TAI"; // Username đã tồn tại
+                return "USERNAME DA TON TAI"; // Username đã tồn tại
             }
 
-            try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+            try (PreparedStatement insertPs = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
                 insertPs.setString(1, username);
                 insertPs.setString(2, PasswordUtils.hashPassword(password));
                 insertPs.setString(3, fullname);
-                insertPs.executeUpdate();
+                int affectedRows = insertPs.executeUpdate();
+                
+                if (affectedRows > 0) {
+                    // Lấy user_id vừa được tạo
+                    ResultSet generatedKeys = insertPs.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        int userId = generatedKeys.getInt(1);
+                        // Tạo bản ghi leaderboard cho user mới
+                        createLeaderboardEntry(userId);
+                    }
+                }
                 return "OK";
             }
 
@@ -101,7 +133,7 @@ public class UserService {
                         .append("|")
                         .append(displayName != null ? displayName : "")
                         .append("|")
-                        .append(status != null ? status : "offline")
+                        .append(status != null ? status : "Offline")
                         .append("|")
                         .append(totalPoints);
 
@@ -201,6 +233,28 @@ public class UserService {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi database khi lấy thông tin người chơi: " + e.getMessage());
+        }
+    }
+
+    private void createLeaderboardEntry(int userId) {
+        String insertLeaderboardSql = "INSERT INTO leaderboard (user_id, total_points, total_matches, total_wins) VALUES (?, ?, ?, ?)";
+        
+        try (PreparedStatement ps = conn.prepareStatement(insertLeaderboardSql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, 0);
+            ps.setInt(3, 0);
+            ps.setInt(4, 0);
+            
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("✅ Đã tạo bản ghi leaderboard cho user ID: " + userId);
+            } else {
+                System.err.println("⚠️ Không thể tạo bản ghi leaderboard cho user ID: " + userId);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Lỗi khi tạo bản ghi leaderboard cho user ID " + userId + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

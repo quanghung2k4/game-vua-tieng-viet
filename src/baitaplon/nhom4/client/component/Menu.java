@@ -5,6 +5,7 @@ import baitaplon.nhom4.client.event.EventMenuSelected;
 import baitaplon.nhom4.client.model.ModelMenu;
 import baitaplon.nhom4.client.swing.MenuItem;
 import baitaplon.nhom4.client.swing.ScrollBarCustom;
+import baitaplon.nhom4.client.swing.Button;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -13,6 +14,7 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import javax.swing.ImageIcon;
 import net.miginfocom.swing.MigLayout;
+import java.awt.event.ActionListener;
 
 /**
  *
@@ -22,14 +24,30 @@ public class Menu extends javax.swing.JPanel {
 
     private EventMenuSelected event;
     private final MigLayout layout;
+    private Button btnLogout;
 
     public Menu() {
+        initLogoutButton();
         initComponents();
         setOpaque(false);
         sp.getViewport().setOpaque(false);
         sp.setVerticalScrollBar(new ScrollBarCustom());
         layout = new MigLayout("wrap,fillx,insets 0,gap 0", "[fill]", "[]");
         panel.setLayout(layout);
+    }
+    
+    private void initLogoutButton() {
+        btnLogout = new Button();
+        btnLogout.setBackground(new Color(220, 53, 69));
+        btnLogout.setForeground(Color.WHITE);
+        btnLogout.setText("Đăng xuất");
+        btnLogout.setFont(new java.awt.Font("SansSerif", 1, 14));
+    }
+    
+    public void addLogoutListener(ActionListener listener) {
+        if (btnLogout != null) {
+            btnLogout.addActionListener(listener);
+        }
     }
 
     public EventMenuSelected getEvent() {
@@ -42,8 +60,7 @@ public class Menu extends javax.swing.JPanel {
 
     public void initMenuItem() {
         addMenu(new ModelMenu(resizeIcon("/baitaplon/nhom4/client/icon/home.png", 25, 25), "Trang chủ"));
-        addMenu(new ModelMenu(resizeIcon("/baitaplon/nhom4/client/icon/rank.png", 25,25), "BXH điểm"));
-        addMenu(new ModelMenu(resizeIcon("/baitaplon/nhom4/client/icon/ranking-star.png", 25,25), "BXH số trận thắng"));
+        addMenu(new ModelMenu(resizeIcon("/baitaplon/nhom4/client/icon/rank.png", 25,25), "Bảng xếp hạng"));
         addMenu(new ModelMenu(resizeIcon("/baitaplon/nhom4/client/icon/time-past.png", 25,25), "Lịch sử đấu"));
     }
 
@@ -99,13 +116,20 @@ public class Menu extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(name2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addComponent(name2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sp, javax.swing.GroupLayout.DEFAULT_SIZE, 445, Short.MAX_VALUE))
+                .addComponent(sp, javax.swing.GroupLayout.DEFAULT_SIZE, 360, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(15, 15, 15))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -113,11 +137,11 @@ public class Menu extends javax.swing.JPanel {
     protected void paintComponent(Graphics g) {
         Graphics2D grap = (Graphics2D) g;
         grap.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        GradientPaint gra = new GradientPaint(0, 0, new Color(127, 229, 255), getWidth(), 0, new Color(127, 229, 255));
+        GradientPaint gra = new GradientPaint(0, 0, new Color(99, 200, 255), getWidth(), 0, new Color(99, 200, 255));
         grap.setPaint(gra);
         grap.fillRect(0, 0, getWidth(), getHeight());
 
-        super.paintComponent(g); 
+        super.paintComponent(g);
     }
 
 

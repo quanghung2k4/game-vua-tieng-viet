@@ -1,119 +1,142 @@
-
 package baitaplon.nhom4.client.component;
 
-import baitaplon.nhom4.client.model.ModelPlayer;
-import baitaplon.nhom4.client.table.EventAction;
-import java.awt.Image;
-import javax.swing.ImageIcon;
+import baitaplon.nhom4.client.model.LeaderboardRow;
 
-public class RankScore extends javax.swing.JPanel {
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
+public class RankScore extends JPanel {
+
+    private JPanel contentPanel;
+    private JScrollPane scrollPane;
+
     public RankScore() {
         initComponents();
-        table1.setShowGrid(false); // bỏ tất cả grid line
-        initTableData();
     }
-    
-    
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
+        setBackground(Color.WHITE);
+        setLayout(new BorderLayout());
+        setOpaque(true);
 
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        table1 = new baitaplon.nhom4.client.table.Table();
+        JLabel title = new JLabel("Bảng xếp hạng", SwingConstants.LEFT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 18));
+        title.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
 
-        setBackground(new java.awt.Color(255, 255, 255));
-        setOpaque(false);
+        contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.WHITE);
 
-        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        jLabel1.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
-        jLabel1.setText("Người chơi");
+        add(title, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
+    }
 
-        table1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Tên", "Điểm", "Xếp hạng"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false, false
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        table1.setFont(new java.awt.Font("SansSerif", 1, 15)); // NOI18N
-        table1.setUpdateSelectionOnSort(false);
-        jScrollPane1.setViewportView(table1);
-        if (table1.getColumnModel().getColumnCount() > 0) {
-            table1.getColumnModel().getColumn(0).setResizable(false);
-            table1.getColumnModel().getColumn(2).setResizable(false);
-        }
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 690, Short.MAX_VALUE)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private baitaplon.nhom4.client.table.Table table1;
-    // End of variables declaration//GEN-END:variables
-
-    private void initTableData() {
-        table1.fixTable(jScrollPane1);
-        EventAction eventAction = new EventAction() {
+    /**
+     * Tạo card bo tròn hiển thị 1 người chơi
+     */
+    private JPanel createPlayerCard(int rank, LeaderboardRow row) {
+        JPanel card = new JPanel() {
             @Override
-            public void invite(ModelPlayer player) {
-                System.out.println("invent");
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                Color bgColor;
+                if (rank == 1) bgColor = new Color(255, 215, 0);       // vàng
+                else if (rank == 2) bgColor = new Color(192, 192, 192); // bạc
+                else if (rank == 3) bgColor = new Color(205, 127, 50);  // đồng
+                else bgColor = new Color(245, 245, 245);
+
+                g2.setColor(bgColor);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+
+                g2.setColor(new Color(220, 220, 220));
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
+
+                g2.dispose();
             }
         };
-        ModelPlayer x1 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),"Jony Nguyen",20,1);
-        ModelPlayer x2 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),"Jony Nguyen",20,2);
-        ModelPlayer x3 = new ModelPlayer(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),"Jony Nguyen",20,3);
-        table1.addRow((Object[]) x1.toRowTable3(eventAction));
-        table1.addRow((Object[]) x2.toRowTable3(eventAction));
-        table1.addRow((Object[]) x3.toRowTable3(eventAction));
+
+        card.setLayout(new GridBagLayout());
+        card.setPreferredSize(new Dimension(640, 80));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        card.setOpaque(false);
+        card.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 10, 5, 10);
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        JLabel rankLabel = new JLabel("#" + rank, SwingConstants.CENTER);
+        rankLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        rankLabel.setForeground(Color.DARK_GRAY);
+        gbc.gridx = 0;
+        gbc.weightx = 0.1;
+        card.add(rankLabel, gbc);
+
+        JLabel nameLabel = new JLabel(row.getDisplayName(), SwingConstants.LEFT);
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        gbc.gridx = 1;
+        gbc.weightx = 0.5;
+        card.add(nameLabel, gbc);
+
+        JLabel pointsLabel = new JLabel("Điểm: " + row.getTotalPoints(), SwingConstants.CENTER);
+        pointsLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        gbc.gridx = 2;
+        gbc.weightx = 0.2;
+        card.add(pointsLabel, gbc);
+
+        JLabel matchesLabel = new JLabel("Trận: " + row.getTotalMatches(), SwingConstants.CENTER);
+        matchesLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        gbc.gridx = 3;
+        gbc.weightx = 0.2;
+        card.add(matchesLabel, gbc);
+
+        JLabel winsLabel = new JLabel("Thắng: " + row.getTotalWins(), SwingConstants.CENTER);
+        winsLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        gbc.gridx = 4;
+        gbc.weightx = 0.2;
+        card.add(winsLabel, gbc);
+
+        return card;
     }
-    
-     private ImageIcon resizeIcon(String path, int width, int height) {
-        ImageIcon icon = new ImageIcon(getClass().getResource(path));
-        Image img = icon.getImage();
-        Image newImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(newImg);
+
+    /**
+     * Gán danh sách người chơi lên bảng xếp hạng
+     */
+    public void setLeaderboard(List<LeaderboardRow> rows) {
+        contentPanel.removeAll();
+
+        if (rows == null || rows.isEmpty()) {
+            JLabel empty = new JLabel("Chưa có dữ liệu xếp hạng", SwingConstants.CENTER);
+            empty.setFont(new Font("SansSerif", Font.ITALIC, 16));
+            empty.setForeground(Color.GRAY);
+            contentPanel.add(Box.createVerticalStrut(20));
+            contentPanel.add(empty);
+        } else {
+            int rank = 1;
+            for (LeaderboardRow row : rows) {
+                JPanel card = createPlayerCard(rank++, row);
+                contentPanel.add(card);
+                contentPanel.add(Box.createVerticalStrut(10)); // khoảng cách giữa các card
+            }
+        }
+
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void clearTable() {
+        contentPanel.removeAll();
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 }

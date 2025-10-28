@@ -47,24 +47,25 @@ public class Table extends JTable{
                 
                 Component com = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                
-                if(column == 2|| column == 3){
-                     
-                    setHorizontalAlignment(JLabel.CENTER);   // căn giữa cột 2
+                // Căn giữa cho cột score (2) và status (3)
+                if(column == 2 || column == 3){
+                    setHorizontalAlignment(JLabel.CENTER);
                 }
+                
+                // Xử lý màu sắc cho cột status (column 3)
                 if(column == 3){
-                     com.setFont(com.getFont().deriveFont(Font.BOLD, 16f)); // in đậm + size 16
-                     com.setForeground(Color.BLACK);
-                }
-                if(column == 3){
-                    String status = value.toString();
-                    if(status.equals("online")){
-                        com.setForeground(Color.GREEN);
-                    } else if(status.equals("busy")){
-                         com.setForeground(Color.RED);
+                    com.setFont(com.getFont().deriveFont(Font.BOLD, 16f)); // in đậm + size 16
+                    String status = value != null ? value.toString().trim() : "";
+                    
+                    if("Online".equalsIgnoreCase(status)){
+                        com.setForeground(new Color(0, 200, 83)); // xanh lá sáng (green)
+                    } else if("Offline".equalsIgnoreCase(status)){
+                        com.setForeground(new Color(255, 0, 0)); // đỏ tươi (red)
                     } else {
-                        com.setForeground(new Color(102,102,102));
+                        com.setForeground(new Color(102,102,102)); // cam (orange) cho các trạng thái khác
                     }
                 } else {
+                    // Các cột khác dùng màu xám
                     com.setForeground(new Color(102,102,102));
                 }
                 if(value instanceof ModelProfile){

@@ -4,18 +4,21 @@ public class Leaderboard {
     private int userId;
     private int totalPoints;
     private int totalMatches;
+    private int totalWins;
 
     // Constructor mặc định
     public Leaderboard() {
         this.totalPoints = 0;
         this.totalMatches = 0;
+        this.totalWins = 0;
     }
 
     // Constructor đầy đủ
-    public Leaderboard(int userId, int totalPoints, int totalMatches) {
+    public Leaderboard(int userId, int totalPoints, int totalMatches, int totalWins) {
         this.userId = userId;
         this.totalPoints = totalPoints;
         this.totalMatches = totalMatches;
+        this.totalWins = totalWins;
     }
 
     // Constructor chỉ với userId
@@ -23,6 +26,7 @@ public class Leaderboard {
         this.userId = userId;
         this.totalPoints = 0;
         this.totalMatches = 0;
+        this.totalWins = 0;
     }
 
     // Getters và Setters
@@ -50,6 +54,14 @@ public class Leaderboard {
         this.totalMatches = totalMatches;
     }
 
+    public int getTotalWins() {
+        return totalWins;
+    }
+
+    public void setTotalWins(int totalWins) {
+        this.totalWins = totalWins;
+    }
+
     // Phương thức tiện ích
     public void addPoints(int points) {
         this.totalPoints += points;
@@ -59,10 +71,15 @@ public class Leaderboard {
         this.totalMatches++;
     }
 
+    public void incrementWins() {
+        this.totalWins++;
+    }
+
     public void addMatchResult(boolean isWin, boolean isDraw) {
         incrementMatches();
         if (isWin) {
             addPoints(3); // 3 điểm cho thắng
+            incrementWins();
         } else if (isDraw) {
             addPoints(1); // 1 điểm cho hòa
         }
@@ -100,6 +117,7 @@ public class Leaderboard {
                 "userId=" + userId +
                 ", totalPoints=" + totalPoints +
                 ", totalMatches=" + totalMatches +
+                ", totalWins=" + totalWins +
                 ", winRate=" + String.format("%.2f", getWinRate()) + "%" +
                 '}';
     }

@@ -3,11 +3,6 @@ package baitaplon.nhom4.client.network;
 import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.controller.LoginController;
 import baitaplon.nhom4.client.model.MessageModel;
-import baitaplon.nhom4.client.controller.GameScreenController;
-import baitaplon.nhom4.client.view.GameScreen;
-import baitaplon.nhom4.shared.game.GameStartDTO;
-import baitaplon.nhom4.shared.game.WordBatchDTO;
-
 import java.io.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,8 +20,7 @@ public class TCPClient {
 
     private DashBoardController dashBoardController;
     private LoginController loginController;
-    private GameScreenController gameScreenController;
-    private volatile GameScreen activeGameScreen;
+    private baitaplon.nhom4.client.controller.LeaderboardController leaderboardController;
 
     public TCPClient(String host, int port) throws IOException {
         this.host = host;
@@ -43,6 +37,8 @@ public class TCPClient {
             running = false;
         }
     }
+
+
 
     public void sendMessage(MessageModel message) throws IOException, ClassNotFoundException {
         out.writeObject(message);      // gửi Message
@@ -65,21 +61,17 @@ public class TCPClient {
                         dashBoardController.handleReceiveInvite(message);
                         break;
                     case "invite_error":
-                        dashBoardController.handleInviteErrorResponse(message);
+                        dashBoardController.handleInviteRespone(message);
                         break;
                     case "invite_result":
-                        dashBoardController.handleInviteResponse(message);
+                        dashBoardController.handleInviteRespone(message);
                         break;
-                    case "game_start":
-                        if (dashBoardController != null && message.getData() instanceof GameStartDTO) {
-                            dashBoardController.handleGameStart((GameStartDTO) message.getData());
+                    case "return_leaderboard":
+                        if (leaderboardController != null) {
+                            leaderboardController.handleLeaderboardResponse(message);
                         }
                         break;
-                    case "game_end":
-                        if (activeGameScreen != null) {
-                            activeGameScreen.handleGameEnd(message.getContent());
-                        }
-                        break;
+
                 }
             }
         } catch (Exception e) {
@@ -95,12 +87,10 @@ public class TCPClient {
     public void setLoginController(LoginController loginController){
         this.loginController = loginController;
     }
-    public void setGameScreenController(GameScreenController controller) {
-        this.gameScreenController = controller;
+    public void setLeaderboardController(baitaplon.nhom4.client.controller.LeaderboardController leaderboardController) {
+        this.leaderboardController = leaderboardController;
     }
-    public void setActiveGameScreen(GameScreen screen) {
-        this.activeGameScreen = screen;
-    }
+
 
 
     public void disconnect() {
