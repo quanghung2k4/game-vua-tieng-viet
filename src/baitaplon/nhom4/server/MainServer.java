@@ -15,6 +15,7 @@ public class MainServer {
 
     public MainServer() {
         try {
+            WordDictionary.loadFromFile("data/clean.txt");
             serverSocket = new ServerSocket(PORT);
             conn = DatabaseManager.getConnection();
             System.out.println("Server đang chạy ở port " + PORT);

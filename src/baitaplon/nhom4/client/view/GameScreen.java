@@ -1,7 +1,6 @@
 package baitaplon.nhom4.client.view;
 
 import baitaplon.nhom4.client.controller.GameScreenController;
-import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.model.ModelResult;
 import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.swing.Button;
@@ -17,17 +16,20 @@ public class GameScreen extends javax.swing.JFrame {
     private Thread countDownThread;
     private int time;
 
-    private final TCPClient tcpClient;
+    private TCPClient tcpClient;
     private GameScreenController controller;
 
     private String myUsername, opponentUsername;
+
+    // Label hiệu ứng +1 điểm
+    private JLabel plusOneLabel;
+
     public GameScreen(TCPClient tcpClient) {
         this.tcpClient = tcpClient;
         initComponents();
         initController();
         this.tcpClient.setActiveGameScreen(this);
-
-        // chặn tắt cửa sổ đột ngột -> confirm
+        // Chặn tắt cửa sổ đột ngột -> confirm
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -36,16 +38,28 @@ public class GameScreen extends javax.swing.JFrame {
             }
         });
 
-        // Bắt đầu timer tổng (ví dụ 120 giây) nếu bạn đang dùng
+    }
+
+    public GameScreen() {
+        initComponents();
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                handleExit();
+            }
+        });
+
+        // Timer tổng
         countDown(120);
     }
 
     private void initController() {
-        controller = new GameScreenController(tcpClient);
+        controller = new GameScreenController(tcpClient, this);
         controller.attachTo(jLayeredPane1);
     }
 
-    // Được DashBoardController gọi khi TCPClient nhận "game_start"
+    // DashBoardController gọi khi TCPClient nhận "game_start"
     public void startGame(GameStartDTO dto) {
         myUsername = dto.getPlayer1();
         opponentUsername = dto.getPlayer2();
@@ -53,17 +67,23 @@ public class GameScreen extends javax.swing.JFrame {
         myName.setText(dto.getPlayer1DisplayName());
         opponentName.setText(dto.getPlayer2DisplayName());
 
-        // Hiển thị countdown 3-2-1 theo thời điểm server gửi và render câu đầu
+        // Count down 3-2-1 theo đồng hồ server rồi render câu đầu
         controller.startWithBatch(dto.getBatch(), dto.getStartAtEpochMs(), dto.getCountdownSeconds(), this);
     }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            GameScreen gs = new GameScreen();          // không cần TCPClient
+            gs.setLocationRelativeTo(null);
+            gs.setVisible(true);
+//            gs.startPreview();                          // chạy demo UI
+        });
+    }
 
-    // TCPClient sẽ gọi khi nhận "game_end"
-    // message content dự kiến: "winnerUsername|loserUsername|reason"
+    // TCPClient sẽ gọi khi nhận "game_end"; content: "winnerUsername|loserUsername|reason"
     public void handleGameEnd(String content) {
         try {
             String[] parts = (content == null ? "" : content).split("\\|");
             String winner = parts.length > 0 ? parts[0] : "";
-            String loser  = parts.length > 1 ? parts[1] : "";
             String reason = parts.length > 2 ? parts[2] : "";
 
             boolean iWin = myUsername != null && myUsername.equals(winner);
@@ -74,7 +94,6 @@ public class GameScreen extends javax.swing.JFrame {
                 time = -1;
             }
 
-            // Tính điểm hiện tại (giữ nguyên nhịp tăng điểm của bạn)
             ModelResult result = new ModelResult(
                     myName.getText(), myScore.getText(),
                     opponentName.getText(), opponentScore.getText(),
@@ -92,6 +111,14 @@ public class GameScreen extends javax.swing.JFrame {
         }
     }
 
+    public void handleOpponentScored(String content) {
+        try {
+            int score = Integer.parseInt(opponentScore.getText());
+            opponentScore.setText("" + (score + 1));
+            showPlusOneUnder(opponentScore);
+        } catch (Exception ignored) {}
+    }
+
     // Nhấn nút Thoát hoặc đóng cửa sổ
     private void handleExit() {
         int opt = JOptionPane.showConfirmDialog(
@@ -102,22 +129,50 @@ public class GameScreen extends javax.swing.JFrame {
                 JOptionPane.WARNING_MESSAGE
         );
         if (opt == JOptionPane.YES_OPTION) {
-            // Gửi forfeit lên server để kết thúc ván và chấm thắng cho đối thủ
             try {
                 String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
                 tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("game_forfeit", content));
             } catch (Exception ignore) {}
-            // Đóng ngay giao diện của người thoát
             this.dispose();
         }
     }
 
+    private void showPlusOneUnder(JLabel scoreLabel) {
+        final int w = 40, h = 22;
+
+        if (plusOneLabel == null) {
+            plusOneLabel = new JLabel("+1", SwingConstants.CENTER);
+            plusOneLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+            plusOneLabel.setForeground(new Color(0, 255, 0));
+            plusOneLabel.setOpaque(false);
+            jLayeredPane1.add(plusOneLabel,
+                    new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, w, h));
+            jLayeredPane1.setLayer(plusOneLabel, JLayeredPane.POPUP_LAYER);
+        }
+        // Tính vị trí ngay dưới ô điểm
+        Point p = SwingUtilities.convertPoint(scoreLabel.getParent(),
+                scoreLabel.getLocation(),
+                jLayeredPane1);
+        int x = p.x + (scoreLabel.getWidth() / 2) - (w / 2);
+        int y = p.y + scoreLabel.getHeight() + 6;
+
+        plusOneLabel.setBounds(x, y, w, h);
+        plusOneLabel.setVisible(true);
+
+        Timer t = new Timer(900, e -> plusOneLabel.setVisible(false));
+        t.setRepeats(false);
+        t.start();
+
+        jLayeredPane1.revalidate();
+        jLayeredPane1.repaint();
+    }
+
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code - giữ nguyên các thành phần đã có; bổ sung xử lý nút Thoát">
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
         jLayeredPane1 = new javax.swing.JLayeredPane();
-        label1 = new baitaplon.nhom4.client.swing.Label();
+        label1 = new baitaplon.nhom4.client.swing.Label();     // placeholder (bỏ)
         btnCheck = new baitaplon.nhom4.client.swing.Button();
         btnExit = new baitaplon.nhom4.client.swing.Button();
         jPanel3 = new javax.swing.JPanel();
@@ -136,10 +191,6 @@ public class GameScreen extends javax.swing.JFrame {
 
         jLayeredPane1.setMaximumSize(new java.awt.Dimension(327, 327));
         jLayeredPane1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        label1.setText("");
-        label1.setFont(new java.awt.Font("SansSerif", 0, 30));
-        jLayeredPane1.add(label1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 400, 40, 60));
 
         btnCheck.setBackground(new java.awt.Color(0, 255, 255));
         btnCheck.setForeground(new java.awt.Color(255, 255, 255));
@@ -164,60 +215,64 @@ public class GameScreen extends javax.swing.JFrame {
         myScore.setFont(new java.awt.Font("SansSerif", 1, 24));
         myScore.setForeground(new java.awt.Color(255, 255, 255));
         myScore.setText("0");
+        myScore.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         opponentScore.setFont(new java.awt.Font("SansSerif", 1, 24));
         opponentScore.setForeground(new java.awt.Color(255, 255, 255));
         opponentScore.setText("0");
+        opponentScore.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         timeDown.setFont(new java.awt.Font("SansSerif", 1, 18));
         timeDown.setForeground(new java.awt.Color(255, 255, 255));
-        timeDown.setText("0:30");
+        timeDown.setText("02:00");
 
         myName.setFont(new java.awt.Font("SansSerif", 1, 14));
         myName.setForeground(new java.awt.Color(51, 51, 51));
-        myName.setText("Bạn");
+        myName.setText("Bạn");;
+        myName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         opponentName.setFont(new java.awt.Font("SansSerif", 1, 14));
         opponentName.setForeground(new java.awt.Color(51, 51, 51));
         opponentName.setText("Đối thủ");
+        opponentName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
                 jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGap(41, 41, 41)
                                 .addComponent(myScore, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
-                                .addComponent(myName, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(40, 40, 40)
-                                .addComponent(timeDown, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(opponentName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(49, 49, 49)
-                                .addComponent(opponentScore, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(24, 24, 24))
+                                .addComponent(myName, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(13, 13, 13)
+                                .addComponent(timeDown, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(11, 11, 11)
+                                .addComponent(opponentName, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(40, 40, 40)
+                                .addComponent(opponentScore, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(24, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
                 jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addGap(26, 26, 26)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(myName, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(myName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(timeDown)
-                                        .addComponent(opponentName, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(opponentName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(33, Short.MAX_VALUE))
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(myScore)
-                                .addGap(36, 36, 36))
+                                .addGap(31, 31, 31))
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(opponentScore)
-                                .addGap(35, 35, 35))
+                                .addGap(31, 31, 31))
         );
 
-        jLayeredPane1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 6, -1, -1));
+        // Thay vì add theo GroupLayout mặc định của NetBeans, setBounds sẽ được đồng bộ trong alignHeaderOverState()
+        jLayeredPane1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(345, 8, -1, -1));
 
         jPanel2.setOpaque(false);
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/baitaplon/nhom4/client/icon/state.png")));
@@ -237,7 +292,7 @@ public class GameScreen extends javax.swing.JFrame {
                                 .addComponent(jLabel2)
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jLayeredPane1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 32, -1, -1));
+        jLayeredPane1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(295, 26, -1, -1));
 
         background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/baitaplon/nhom4/client/icon/background-game.png")));
 
@@ -266,16 +321,29 @@ public class GameScreen extends javax.swing.JFrame {
 
     private void btnCheckMouseClicked(java.awt.event.MouseEvent evt) {
         if (controller.checkAnswer()) {
+            // Xóa ngay phần đã sắp xếp ở bên trên
+            controller.clearSelectedLetters();
+
+            // Cộng điểm và hiện +1 ngay dưới ô điểm của người ghi điểm (bên mình)
             int score = Integer.parseInt(myScore.getText());
             myScore.setText("" + (score + 1));
+            showPlusOneUnder(myScore);
+            // Từ tiếp theo
             controller.nextWord();
+            try {
+                if (tcpClient != null) {
+                    String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
+                    tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("game_word_correct", content));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
             JOptionPane.showMessageDialog(this, "❌ Sai rồi! Hãy thử lại.");
         }
     }
 
-    // Timer tổng thể (giữ logic cũ)
-    private void countDown(int t) {
+    public void countDown(int t) {
         this.time = t;
         countDownThread = new Thread(() -> {
             while (time >= 0) {
@@ -283,7 +351,6 @@ public class GameScreen extends javax.swing.JFrame {
                 int seconds = time % 60;
                 timeDown.setText(String.format("%d:%02d", minutes, seconds));
                 try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-                if(time % 5 == 0) opponentScore.setText(""+(Integer.parseInt(opponentScore.getText()) + 1));
                 time--;
             }
             if (time < 0) {
@@ -311,7 +378,7 @@ public class GameScreen extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private baitaplon.nhom4.client.swing.Label label1;
+    private baitaplon.nhom4.client.swing.Label label1; // placeholder, không dùng
     private javax.swing.JLabel myName;
     private javax.swing.JLabel myScore;
     private javax.swing.JLabel opponentName;
