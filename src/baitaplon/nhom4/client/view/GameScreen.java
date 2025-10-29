@@ -1,5 +1,6 @@
 package baitaplon.nhom4.client.view;
 
+import baitaplon.nhom4.client.component.Message;
 import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.controller.GameScreenController;
 import baitaplon.nhom4.client.model.ModelResult;
@@ -20,7 +21,7 @@ public class GameScreen extends javax.swing.JFrame {
     private TCPClient tcpClient;
     private GameScreenController controller;
 
-    private String myUsername, opponentUsername;
+    private String hosting, myUsername, opponentUsername;
     private boolean isEndGame = false;
     // Label hiệu ứng +1 điểm
     private JLabel plusOneLabel;
@@ -62,6 +63,7 @@ public class GameScreen extends javax.swing.JFrame {
 
     // DashBoardController gọi khi TCPClient nhận "game_start"
     public void startGame(GameStartDTO dto) {
+        hosting = dto.getInviter();
         myUsername = dto.getPlayer1();
         opponentUsername = dto.getPlayer2();
 
@@ -85,50 +87,29 @@ public class GameScreen extends javax.swing.JFrame {
         if(isEndGame) return;
         try {
             isEndGame = true;
-            String[] parts = (content == null ? "" : content).split("\\|");
-            String winner = parts.length > 0 ? parts[0] : "";
-            String reason = parts.length > 2 ? parts[2] : "";
-            if(!myUsername.equals(winner) && (reason.equals("disconnect") || reason.equals("player_out"))){
-                return;
-            }
-//            if(!myUsername.equals(winner) && reason.equals("game_forfeit")){
-//                DashBoard dashboard = new DashBoard(myUsername, tcpClient);
-//                DashBoardController dashBoardController = new DashBoardController(myUsername, dashboard, tcpClient);
-//                dashboard.setDashBoardController(dashBoardController);
-//
-//                tcpClient.setDashBoardController(dashBoardController);
-//                dashboard.setTitleWithUsername();
-//                dashboard.setVisible(true);
-//                this.dispose();
-//                return;
-//            }
 
-//            boolean iWin = myUsername != null && myUsername.equals(winner);
-//            String verdict = iWin ? "Win" : "Loss";
-            String verdict, message;
-            if(reason.equals("game_forfeit")){
-                if(myUsername.equals(winner)){
-                    verdict = "Win";
-                    message = "Bạn thắng! (" + reason + ")";
-                } else{
-                    verdict = "Lose";
-                    message = "Bạn thua! (" + reason + ")";
+            String[] parts = (content == null ? "" : content).split("\\|");
+            String verdict = parts.length > 0 ? parts[0] : "";
+            String reason = parts.length > 1 ? parts[1] : "";
+            String message = "";
+            if(reason == "game_forfeit"){
+                if(verdict.equals("Win")) {
+                    message = "Đối thủ đã đầu hàng!";
+                }
+                else {
+                    message = "Bạn đã đầu hàng!";
                 }
             }
-            else
-            {
-                int my = Integer.parseInt(myScore.getText());
-                int opp = Integer.parseInt(opponentScore.getText());
-                if (my > opp) {
-                    verdict = "Win";
-                    message = "Bạn thắng! (" + reason + ")";
-                } else if (my < opp) {
-                    verdict = "Lose";
-                    message = "Bạn thua! (" + reason + ")";
-                } else {
-                    verdict = "Draw";
-                    message = "Hòa! (" + reason + ")";
+            if(reason == "finish_game"){
+                if(verdict.equals("Win")) {
+                    message = "Bạn đã thắng!";
                 }
+                else {
+                    message = "Bạn đã thua!";
+                }
+            }
+            if(reason == "disconnect"){
+                message = "Đối thủ đã rời đi hoặc mất kết nối";
             }
 
             ModelResult result = new ModelResult(
@@ -165,7 +146,7 @@ public class GameScreen extends javax.swing.JFrame {
         if (opt == JOptionPane.YES_OPTION) {
             try {
                 String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
-                tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("game_out", content));
+                tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("player_out", content));
             } catch (Exception ignore) {}
             this.dispose();
         }
@@ -181,8 +162,9 @@ public class GameScreen extends javax.swing.JFrame {
         );
         if (opt == JOptionPane.YES_OPTION) {
             try {
-                String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
-                tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("game_forfeit", content));
+                String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "")
+                                + "2|game_forfeit";
+                tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
             } catch (Exception ignore) {}
             this.dispose();
         }
@@ -191,31 +173,33 @@ public class GameScreen extends javax.swing.JFrame {
     private void showPlusOneUnder(JLabel scoreLabel) {
         final int w = 40, h = 22;
 
+        // Tính vị trí ngay dưới ô điểm trong toạ độ của jLayeredPane1
+        Point p = SwingUtilities.convertPoint(scoreLabel.getParent(),
+                scoreLabel.getLocation(),
+                jLayeredPane1);
+        int x = p.x + (scoreLabel.getWidth() - w) / 2;
+        int y = p.y + scoreLabel.getHeight() + 6;
+
         if (plusOneLabel == null) {
             plusOneLabel = new JLabel("+1", SwingConstants.CENTER);
             plusOneLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
             plusOneLabel.setForeground(new Color(0, 255, 0));
             plusOneLabel.setOpaque(false);
             jLayeredPane1.add(plusOneLabel,
-                    new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, w, h));
+                    new org.netbeans.lib.awtextra.AbsoluteConstraints(x, y, w, h));
             jLayeredPane1.setLayer(plusOneLabel, JLayeredPane.POPUP_LAYER);
+        } else {
+            jLayeredPane1.add(plusOneLabel,
+                    new org.netbeans.lib.awtextra.AbsoluteConstraints(x, y, w, h));
         }
-        // Tính vị trí ngay dưới ô điểm
-        Point p = SwingUtilities.convertPoint(scoreLabel.getParent(),
-                scoreLabel.getLocation(),
-                jLayeredPane1);
-        int x = p.x + (scoreLabel.getWidth() / 2) - (w / 2);
-        int y = p.y + scoreLabel.getHeight() + 6;
 
-        plusOneLabel.setBounds(x, y, w, h);
         plusOneLabel.setVisible(true);
+        jLayeredPane1.revalidate();
+        jLayeredPane1.repaint();
 
         Timer t = new Timer(900, e -> plusOneLabel.setVisible(false));
         t.setRepeats(false);
         t.start();
-
-        jLayeredPane1.revalidate();
-        jLayeredPane1.repaint();
     }
 
     @SuppressWarnings("unchecked")
@@ -405,20 +389,16 @@ public class GameScreen extends javax.swing.JFrame {
                 time--;
             }
             if (time < 0) {
-//                isEndGame = true;
-//                String ans = "Hòa";
-//                int mScore = Integer.parseInt(myScore.getText());
-//                int oScore = Integer.parseInt(opponentScore.getText());
-//                if(mScore > oScore) ans = "Win";
-//                else if(mScore < oScore) ans = "Loss";
-//                ModelResult result = new ModelResult(myName.getText(),myScore.getText(),
-//                        opponentName.getText(),opponentScore.getText(), ans);
-//                GameResult gameResult = new GameResult(result);
-//                gameResult.setVisible(true);
-//                this.dispose();
                 try {
-                    String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
-                    tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
+                    if(hosting.equals(myUsername)){
+                        String result = "3";
+                        int mScore = Integer.parseInt(myScore.getText());
+                        int oScore = Integer.parseInt(opponentScore.getText());
+                        if(mScore > oScore) result = "1";
+                        if(mScore > mScore) result = "2";
+                        String content = myUsername +"|"+ opponentUsername +"|"+ result + "|" + "finish_game";
+                        tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
+                    }
                 } catch (Exception ignore) {}
             }
         });

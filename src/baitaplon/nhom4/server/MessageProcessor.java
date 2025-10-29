@@ -71,17 +71,12 @@ public class MessageProcessor {
                 break;
             }
             case "finish_game": {
-                // content: "loserUsername|opponentUsername" (opponent optional)
                 String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
-                String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
-                GameSessionManager.finishGame(loser);
-                break;
-            }
-            case "player_forfeit": {
-                // content: "loserUsername|opponentUsername" (opponent optional)
-                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
-                String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
-                GameSessionManager.playerForfeit(loser);
+                String p1 = parts.length > 0 ? parts[0] : null;
+                String p2 = parts.length > 1 ? parts[1] : null;
+                String pWin = parts.length > 3 ? parts[3] : null;
+                String reason =  parts.length > 4 ? parts[4] : null;
+                GameSessionManager.finishGame(p1, p2, pWin, reason);
                 break;
             }
             case "player_out": {
@@ -237,13 +232,12 @@ public class MessageProcessor {
         long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
         WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
 
-
         System.out.println("startGameForUsers: "+userA +" "+ userB);
         User user1 = userService.getUserByUserName(userA);
         User user2 = userService.getUserByUserName(userB);
 
-        GameStartDTO dtoAB = new GameStartDTO(userA, userB, user1.getDisplayName(), user2.getDisplayName(), batch, startAt, 3);
-        GameStartDTO dtoBA = new GameStartDTO(userB, userA, user2.getDisplayName(), user1.getDisplayName(), batch, startAt, 3);
+        GameStartDTO dtoAB = new GameStartDTO(userA, userA, userB, user1.getDisplayName(), user2.getDisplayName(), batch, startAt, 3);
+        GameStartDTO dtoBA = new GameStartDTO(userA, userB, userA, user2.getDisplayName(), user1.getDisplayName(), batch, startAt, 3);
 
         MessageModel startA = new MessageModel("game_start", dtoAB);
         MessageModel startB = new MessageModel("game_start", dtoBA);
