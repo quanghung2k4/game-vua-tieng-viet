@@ -83,6 +83,11 @@ public class TCPClient {
                             dashBoardController.handleGameStart((GameStartDTO) message.getData());
                         }
                         break;
+                    case "opponent_scored":
+                        if (activeGameScreen != null) {
+                            activeGameScreen.handleOpponentScored(message.getContent());
+                        }
+                        break;
                     case "game_end":
                         if (activeGameScreen != null) {
                             activeGameScreen.handleGameEnd(message.getContent());
