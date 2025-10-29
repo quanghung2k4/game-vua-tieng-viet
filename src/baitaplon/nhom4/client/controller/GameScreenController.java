@@ -59,7 +59,7 @@ public class GameScreenController {
         if (seconds <= 0) seconds = Math.max(1, fallbackSeconds);
 
         CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(() -> {
-            gameScreen.countDown(120);
+            gameScreen.countDown(30);
             nextWord();
         }));
     }
@@ -95,9 +95,7 @@ public class GameScreenController {
             JOptionPane.showMessageDialog(layeredPane, "Hết câu hỏi!");
             return;
         }
-        System.out.print(queue.peekFirst().getOriginalWord() + " ");
         current = queue.pollFirst();
-        System.out.print(queue.peekFirst().getOriginalWord() + " ");
         clearSelectedLetters();
         renderShuffledLetters();
     }

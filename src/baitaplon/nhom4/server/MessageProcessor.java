@@ -74,8 +74,8 @@ public class MessageProcessor {
                 String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
                 String p1 = parts.length > 0 ? parts[0] : null;
                 String p2 = parts.length > 1 ? parts[1] : null;
-                String pWin = parts.length > 3 ? parts[3] : null;
-                String reason =  parts.length > 4 ? parts[4] : null;
+                String pWin = parts.length > 2 ? parts[2] : null;
+                String reason =  parts.length > 3 ? parts[3] : null;
                 GameSessionManager.finishGame(p1, p2, pWin, reason);
                 break;
             }

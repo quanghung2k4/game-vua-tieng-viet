@@ -87,12 +87,12 @@ public class GameScreen extends javax.swing.JFrame {
         if(isEndGame) return;
         try {
             isEndGame = true;
-
             String[] parts = (content == null ? "" : content).split("\\|");
             String verdict = parts.length > 0 ? parts[0] : "";
             String reason = parts.length > 1 ? parts[1] : "";
             String message = "";
-            if(reason == "game_forfeit"){
+            System.out.println(verdict+" "+reason);
+            if(reason.equals("game_forfeit")){
                 if(verdict.equals("Win")) {
                     message = "Đối thủ đã đầu hàng!";
                 }
@@ -100,18 +100,21 @@ public class GameScreen extends javax.swing.JFrame {
                     message = "Bạn đã đầu hàng!";
                 }
             }
-            if(reason == "finish_game"){
+            if(reason.equals("finish_game")){
                 if(verdict.equals("Win")) {
                     message = "Bạn đã thắng!";
+                }
+                else if(verdict.equals("Draw")) {
+                    message = "Hai người chơi hòa ván này";
                 }
                 else {
                     message = "Bạn đã thua!";
                 }
             }
-            if(reason == "disconnect"){
+            if(reason.equals("disconnect")){
                 message = "Đối thủ đã rời đi hoặc mất kết nối";
             }
-
+            System.out.println(message);
             ModelResult result = new ModelResult(
                     myName.getText(), myScore.getText(),
                     opponentName.getText(), opponentScore.getText(),
@@ -145,6 +148,7 @@ public class GameScreen extends javax.swing.JFrame {
         );
         if (opt == JOptionPane.YES_OPTION) {
             try {
+                isEndGame = true;
                 String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
                 tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("player_out", content));
             } catch (Exception ignore) {}
@@ -163,7 +167,7 @@ public class GameScreen extends javax.swing.JFrame {
         if (opt == JOptionPane.YES_OPTION) {
             try {
                 String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "")
-                                + "2|game_forfeit";
+                                + "|2|game_forfeit";
                 tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
             } catch (Exception ignore) {}
             this.dispose();

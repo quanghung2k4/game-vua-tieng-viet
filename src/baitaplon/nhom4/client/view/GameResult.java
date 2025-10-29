@@ -302,7 +302,7 @@ public class GameResult extends javax.swing.JFrame {
             tmp1 = "(+1)";
             tmp2 = "(-1)";
             imgResult.setIcon(new ImageIcon(getClass().getResource("/baitaplon/nhom4/client/icon/winner.png")));
-        } else  if(_result.getResult().equals("Loss")){
+        } else  if(_result.getResult().equals("Lose")){
             tmp1 = "(-1)";
             tmp2 = "(+1)";
             imgResult.setIcon(new ImageIcon(getClass().getResource("/baitaplon/nhom4/client/icon/loser.png")));
