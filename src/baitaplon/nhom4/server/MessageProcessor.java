@@ -79,7 +79,15 @@ public class MessageProcessor {
         String username = tmp[0];
         String password = tmp[1];
         String result = userService.checkLogin(username, password);
+        System.out.println(result);
+        if (result.equals("OK")) {
+            User loggedInUser = userService.getUserByUserName(username);
+            // Gán user đó vào client hiện tại
+            client.setUser(loggedInUser);
+        }
+        System.out.println("sent");
         client.sendMessage(new MessageModel("return_login", result));
+        System.out.println("sented");
     }
 
     private void handleRegister(MessageModel message) throws IOException {
@@ -111,7 +119,7 @@ public class MessageProcessor {
         try {
             String leaderboardData = leaderboardService.getLeaderboard();
             client.sendMessage(new MessageModel("return_leaderboard", leaderboardData));
-            System.out.println("✅ Đã gửi bảng xếp hạng thành công");
+//            System.out.println("✅ Đã gửi bảng xếp hạng thành công");
         } catch (Exception e) {
             System.err.println("❌ Lỗi khi lấy bảng xếp hạng: " + e.getMessage());
             client.sendMessage(new MessageModel("return_leaderboard", "ERROR|Không thể lấy bảng xếp hạng"));
@@ -168,7 +176,7 @@ public class MessageProcessor {
         try {
             String[] parts = message.getContent().split("\\|");
             if (parts.length != 3) {
-                client.sendMessage(new MessageModel("invite_error", "Dữ liệu phản hồi không hợp lệ."));
+                client.sendMessage(new MessageModel("invite_error", "Dữ liệu phản hồi không hợp lệ"));
                 return;
             }
 
@@ -178,7 +186,7 @@ public class MessageProcessor {
 
             ClientHandler senderClient = MainServer.getClientHandlerByUserName(senderUsername);
             if (senderClient == null) {
-                client.sendMessage(new MessageModel("invite_error", "Người mời không còn trực tuyến."));
+                client.sendMessage(new MessageModel("invite_error", "Người mời không còn trực tuyến"));
                 return;
             }
 
@@ -187,27 +195,25 @@ public class MessageProcessor {
             reply.setType("invite_result");
             // format: receiverUsername|receiverDisplayName|response
             User receiver = userService.getUserByUserName(receiverUsername);
-            reply.setContent(receiverUsername + "|" + receiver.getDisplayName() + "|" + response);
-
+            reply.setContent(senderClient.getUser().getDisplayName()+"|"+receiverUsername + "|" + receiver.getDisplayName() + "|" + response);
+            
             senderClient.sendMessage(reply);
-
-            // Nếu đồng ý, khởi tạo ván đấu luôn (đảm bảo không cần thông báo "đã chấp nhận")
-            if ("respone_accept".equals(response)) {
-                startGameForUsers(senderUsername, receiverUsername);
-            }
-
         } catch (Exception e) {
             client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý phản hồi lời mời: " + e.getMessage()));
         }
     }
 
-    private void startGameForUsers(String userA, String userB) throws IOException {
-        long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
+    private void startGameForUsers(String userA, String userB) {
+        try{
+            long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
         WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
-
+        
+        
+        System.out.println("startGameForUsers: "+userA +" "+ userB);
         User user1 = userService.getUserByUserName(userA);
         User user2 = userService.getUserByUserName(userB);
-
+        
+        System.out.println("bat dau game");
         GameStartDTO dtoAB = new GameStartDTO(userA, userB, user1.getDisplayName(), user2.getDisplayName(), batch, startAt, 3);
         GameStartDTO dtoBA = new GameStartDTO(userB, userA, user2.getDisplayName(), user1.getDisplayName(), batch, startAt, 3);
 
@@ -222,5 +228,10 @@ public class MessageProcessor {
 
         // Đăng ký cặp đang thi đấu để xử lý thoát/mất kết nối
         GameSessionManager.registerPair(userA, userB);
+            
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
     }
 }

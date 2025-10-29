@@ -4,6 +4,7 @@ import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.controller.LoginController;
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.view.GameScreen;
+import baitaplon.nhom4.shared.game.GameStartDTO;
 
 import java.io.*;
 import java.io.IOException;
@@ -64,14 +65,22 @@ public class TCPClient {
                         dashBoardController.handleReceiveInvite(message);
                         break;
                     case "invite_error":
-                        dashBoardController.handleInviteErrorResponse(message);
+                        dashBoardController.handleInviteResponse(message);
                         break;
                     case "invite_result":
+                        dashBoardController.handleInviteResponse(message);
+                        break;
+                    case "invite_cancel":
                         dashBoardController.handleInviteResponse(message);
                         break;
                     case "return_leaderboard":
                         if (leaderboardController != null) {
                             leaderboardController.handleLeaderboardResponse(message);
+                        }
+                        break;
+                    case "game_start":
+                        if (dashBoardController != null && message.getData() instanceof GameStartDTO) {
+                            dashBoardController.handleGameStart((GameStartDTO) message.getData());
                         }
                         break;
                     case "game_end":

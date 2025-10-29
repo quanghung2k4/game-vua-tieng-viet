@@ -17,9 +17,9 @@ public class MainServer {
         try {
             serverSocket = new ServerSocket(PORT);
             conn = DatabaseManager.getConnection();
-            System.out.println("✅ Server đang chạy ở port " + PORT);
-            conn = DatabaseManager.getConnection(); //Gọi hàm static lấy connection
             System.out.println("Server đang chạy ở port " + PORT);
+            conn = DatabaseManager.getConnection(); //Gọi hàm static lấy connection
+
 
             while (true) {
                 Socket client = serverSocket.accept();
