@@ -42,7 +42,7 @@ public class GameScreenController {
 
         // Vị trí: hàng sắp xếp (trên), hàng lựa chọn (dưới)
         layeredPane.add(selectedLettersPanel,
-                new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 250, 800, 80));
+                new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 800, 80));
         layeredPane.add(shuffledLettersPanel,
                 new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 370, 800, 80));
         layeredPane.setLayer(selectedLettersPanel, JLayeredPane.PALETTE_LAYER);
@@ -175,7 +175,7 @@ public class GameScreenController {
         label.setForeground(Color.WHITE);
         label.setPreferredSize(new Dimension(50, 50));
         label.setOpaque(true);
-        label.setBackground(new Color(0, 200, 200, 100));
+        label.setBackground(new Color(0, 200, 200, 200));
         label.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
         return label;
     }

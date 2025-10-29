@@ -70,11 +70,25 @@ public class MessageProcessor {
                 }
                 break;
             }
-            case "game_forfeit": {
+            case "finish_game": {
                 // content: "loserUsername|opponentUsername" (opponent optional)
                 String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
                 String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
-                GameSessionManager.forfeit(loser);
+                GameSessionManager.finishGame(loser);
+                break;
+            }
+            case "player_forfeit": {
+                // content: "loserUsername|opponentUsername" (opponent optional)
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
+                GameSessionManager.playerForfeit(loser);
+                break;
+            }
+            case "player_out": {
+                // content: "loserUsername|opponentUsername" (opponent optional)
+                String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
+                String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
+                GameSessionManager.playerOut(loser);
                 break;
             }
             default:
@@ -93,6 +107,10 @@ public class MessageProcessor {
         String username = tmp[0];
         String password = tmp[1];
         String result = userService.checkLogin(username, password);
+        if (result.equals("OK")) {
+            User loggedInUser = userService.getUserByUserName(username);
+            client.setUser(loggedInUser);
+        }
         client.sendMessage(new MessageModel("return_login", result));
     }
 

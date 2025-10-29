@@ -1,5 +1,6 @@
 package baitaplon.nhom4.client.view;
 
+import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.controller.GameScreenController;
 import baitaplon.nhom4.client.model.ModelResult;
 import baitaplon.nhom4.client.network.TCPClient;
@@ -20,7 +21,7 @@ public class GameScreen extends javax.swing.JFrame {
     private GameScreenController controller;
 
     private String myUsername, opponentUsername;
-
+    private boolean isEndGame = false;
     // Label hiệu ứng +1 điểm
     private JLabel plusOneLabel;
 
@@ -81,17 +82,53 @@ public class GameScreen extends javax.swing.JFrame {
 
     // TCPClient sẽ gọi khi nhận "game_end"; content: "winnerUsername|loserUsername|reason"
     public void handleGameEnd(String content) {
+        if(isEndGame) return;
         try {
+            isEndGame = true;
             String[] parts = (content == null ? "" : content).split("\\|");
             String winner = parts.length > 0 ? parts[0] : "";
             String reason = parts.length > 2 ? parts[2] : "";
+            if(!myUsername.equals(winner) && (reason.equals("disconnect") || reason.equals("player_out"))){
+                return;
+            }
+//            if(!myUsername.equals(winner) && reason.equals("game_forfeit")){
+//                DashBoard dashboard = new DashBoard(myUsername, tcpClient);
+//                DashBoardController dashBoardController = new DashBoardController(myUsername, dashboard, tcpClient);
+//                dashboard.setDashBoardController(dashBoardController);
+//
+//                tcpClient.setDashBoardController(dashBoardController);
+//                dashboard.setTitleWithUsername();
+//                dashboard.setVisible(true);
+//                this.dispose();
+//                return;
+//            }
 
-            boolean iWin = myUsername != null && myUsername.equals(winner);
-            String verdict = iWin ? "Win" : "Loss";
-
-            // Dừng đồng hồ nếu có
-            if (countDownThread != null && countDownThread.isAlive()) {
-                time = -1;
+//            boolean iWin = myUsername != null && myUsername.equals(winner);
+//            String verdict = iWin ? "Win" : "Loss";
+            String verdict, message;
+            if(reason.equals("game_forfeit")){
+                if(myUsername.equals(winner)){
+                    verdict = "Win";
+                    message = "Bạn thắng! (" + reason + ")";
+                } else{
+                    verdict = "Lose";
+                    message = "Bạn thua! (" + reason + ")";
+                }
+            }
+            else
+            {
+                int my = Integer.parseInt(myScore.getText());
+                int opp = Integer.parseInt(opponentScore.getText());
+                if (my > opp) {
+                    verdict = "Win";
+                    message = "Bạn thắng! (" + reason + ")";
+                } else if (my < opp) {
+                    verdict = "Lose";
+                    message = "Bạn thua! (" + reason + ")";
+                } else {
+                    verdict = "Draw";
+                    message = "Hòa! (" + reason + ")";
+                }
             }
 
             ModelResult result = new ModelResult(
@@ -99,9 +136,7 @@ public class GameScreen extends javax.swing.JFrame {
                     opponentName.getText(), opponentScore.getText(),
                     verdict
             );
-            JOptionPane.showMessageDialog(this,
-                    (iWin ? "Bạn thắng! " : "Bạn thua! ") + "(" + reason + ")",
-                    "Kết thúc ván", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, message, "Kết thúc ván", JOptionPane.INFORMATION_MESSAGE);
 
             GameResult gameResult = new GameResult(result);
             gameResult.setVisible(true);
@@ -119,8 +154,24 @@ public class GameScreen extends javax.swing.JFrame {
         } catch (Exception ignored) {}
     }
 
-    // Nhấn nút Thoát hoặc đóng cửa sổ
     private void handleExit() {
+        int opt = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc muốn thoát game không? Đối thủ sẽ thắng ván này.",
+                "Xác nhận thoát",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+        if (opt == JOptionPane.YES_OPTION) {
+            try {
+                String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
+                tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("game_out", content));
+            } catch (Exception ignore) {}
+            this.dispose();
+        }
+    }
+
+    private void handleForfeit(){
         int opt = JOptionPane.showConfirmDialog(
                 this,
                 "Bạn có chắc muốn thoát không? Đối thủ sẽ thắng ván này.",
@@ -207,7 +258,7 @@ public class GameScreen extends javax.swing.JFrame {
         btnExit.setForeground(new java.awt.Color(255, 255, 255));
         btnExit.setText("Thoát");
         btnExit.setFont(new java.awt.Font("SansSerif", 0, 14));
-        btnExit.addActionListener(e -> handleExit());
+        btnExit.addActionListener(e -> handleForfeit());
         jLayeredPane1.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, 80, 30));
 
         jPanel3.setOpaque(false);
@@ -224,7 +275,7 @@ public class GameScreen extends javax.swing.JFrame {
 
         timeDown.setFont(new java.awt.Font("SansSerif", 1, 18));
         timeDown.setForeground(new java.awt.Color(255, 255, 255));
-        timeDown.setText("02:00");
+        timeDown.setText("2:00");
 
         myName.setFont(new java.awt.Font("SansSerif", 1, 14));
         myName.setForeground(new java.awt.Color(51, 51, 51));
@@ -346,7 +397,7 @@ public class GameScreen extends javax.swing.JFrame {
     public void countDown(int t) {
         this.time = t;
         countDownThread = new Thread(() -> {
-            while (time >= 0) {
+            while (time >= 0 && !isEndGame) {
                 int minutes = time / 60;
                 int seconds = time % 60;
                 timeDown.setText(String.format("%d:%02d", minutes, seconds));
@@ -354,16 +405,21 @@ public class GameScreen extends javax.swing.JFrame {
                 time--;
             }
             if (time < 0) {
-                String ans = "Hòa";
-                int mScore = Integer.parseInt(myScore.getText());
-                int oScore = Integer.parseInt(opponentScore.getText());
-                if(mScore > oScore) ans = "Win";
-                else if(mScore < oScore) ans = "Loss";
-                ModelResult result = new ModelResult(myName.getText(),myScore.getText(),
-                        opponentName.getText(),opponentScore.getText(), ans);
-                GameResult gameResult = new GameResult(result);
-                gameResult.setVisible(true);
-                this.dispose();
+//                isEndGame = true;
+//                String ans = "Hòa";
+//                int mScore = Integer.parseInt(myScore.getText());
+//                int oScore = Integer.parseInt(opponentScore.getText());
+//                if(mScore > oScore) ans = "Win";
+//                else if(mScore < oScore) ans = "Loss";
+//                ModelResult result = new ModelResult(myName.getText(),myScore.getText(),
+//                        opponentName.getText(),opponentScore.getText(), ans);
+//                GameResult gameResult = new GameResult(result);
+//                gameResult.setVisible(true);
+//                this.dispose();
+                try {
+                    String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "");
+                    tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
+                } catch (Exception ignore) {}
             }
         });
         countDownThread.start();

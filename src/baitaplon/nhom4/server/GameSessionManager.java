@@ -40,10 +40,24 @@ public class GameSessionManager {
         } catch (Exception ignored) {}
     }
 
-    public static void forfeit(String loser) {
+    public static void finishGame(String loser) {
         String opp = getOpponent(loser);
         if (opp != null) {
-            endGame(opp, loser, "forfeit");
+            endGame(opp, loser, "finish_game");
+        }
+    }
+
+    public static void playerForfeit(String loser) {
+        String opp = getOpponent(loser);
+        if (opp != null) {
+            endGame(opp, loser, "player_forfeit");
+        }
+    }
+
+    public static void playerOut(String loser) {
+        String opp = getOpponent(loser);
+        if (opp != null) {
+            endGame(opp, loser, "player_out");
         }
     }
 
