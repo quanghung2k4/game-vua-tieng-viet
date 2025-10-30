@@ -71,7 +71,6 @@ public class GameSessionManager {
     }
 
     private static void recordGameResult(String p1, String p2, String pWin) {
-        System.out.println("p1 = " + p1 + ", p2 = " + p2);
         UserService userService = new UserService(conn);
         User user1 = userService.getUserByUserName(p1);
         User user2 = userService.getUserByUserName(p2);
@@ -86,9 +85,7 @@ public class GameSessionManager {
             result1 = 0;
             result2 = 3;
         }
-        System.out.println("Lấy thời gian bắt đầu cho p1: " + p1);
         LocalDateTime playedAt = getStartTime(p1);
-        System.out.println("playedAt = " + playedAt);
         GameResultService gameResultService = new GameResultService(conn);
         LeaderboardService leaderBoardService = new LeaderboardService(conn);
 

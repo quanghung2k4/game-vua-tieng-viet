@@ -229,7 +229,7 @@ public class MessageProcessor {
     }
 
     private void startGameForUsers(String userA, String userB) throws IOException {
-        long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
+        long startAt = System.currentTimeMillis() + 3500;
         WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
 
         System.out.println("startGameForUsers: "+userA +" "+ userB);

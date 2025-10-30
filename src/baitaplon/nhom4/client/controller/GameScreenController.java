@@ -59,7 +59,7 @@ public class GameScreenController {
         if (seconds <= 0) seconds = Math.max(1, fallbackSeconds);
 
         CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(() -> {
-            gameScreen.countDown(30);
+            gameScreen.countDown(120);
             nextWord();
         }));
     }
