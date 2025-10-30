@@ -27,6 +27,10 @@ public class GameWordService {
                 list.add(new WordChallengeDTO(ch.getOriginalWord(), ch.getOriginalLetters(), ch.getShuffledLetters()));
             });
         }
+        System.out.println("Generated " + list.size() + " words in " + attempts + " attempts");
+        for(WordChallengeDTO dto : list) {
+            System.out.println(dto.getOriginalWord() + " " + dto.getOriginalLetters());
+        }
         return new WordBatchDTO(list);
     }
 }

@@ -27,7 +27,7 @@ public class Profile extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        pic = new com.raven.swing.ImageAvatar();
+        pic = new baitaplon.nhom4.client.swing.ImageAvatar();
         lbName = new javax.swing.JLabel();
 
         lbName.setFont(new java.awt.Font("SansSerif", 1, 15)); // NOI18N
@@ -61,6 +61,6 @@ public class Profile extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lbName;
-    private com.raven.swing.ImageAvatar pic;
+    private baitaplon.nhom4.client.swing.ImageAvatar pic;
     // End of variables declaration//GEN-END:variables
 }

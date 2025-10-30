@@ -16,11 +16,25 @@ public class CountDownDialog extends JDialog {
         label.setFont(new Font("SansSerif", Font.BOLD, 72));
         label.setForeground(Color.WHITE);
 
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(0, 0, 0, 180));
+        JPanel panel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40); // Bo góc
+                g2.dispose();
+            }
+        };
+        panel.setBackground(new Color(0, 0, 0, 255));
         panel.add(label, BorderLayout.CENTER);
         setContentPane(panel);
+
+        // Bo tròn dialog
+        setShape(new java.awt.geom.RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 40, 40));
     }
+
 
     public static void show(JFrame owner, int seconds, Runnable onDone) {
         CountDownDialog dlg = new CountDownDialog(owner);

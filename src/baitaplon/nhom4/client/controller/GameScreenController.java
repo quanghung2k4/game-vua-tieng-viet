@@ -2,15 +2,15 @@ package baitaplon.nhom4.client.controller;
 
 import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.component.CountDownDialog;
+import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.shared.game.WordBatchDTO;
 import baitaplon.nhom4.shared.game.WordChallengeDTO;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GameScreenController {
 
@@ -22,10 +22,12 @@ public class GameScreenController {
 
     private final Deque<WordChallengeDTO> queue = new ArrayDeque<>(64);
     private WordChallengeDTO current;
-    private final List<String> selectedLetters = new ArrayList<>();
-    private final List<JButton> letterButtons = new ArrayList<>();
+    private final java.util.List<String> selectedLetters = new java.util.ArrayList<>();
+    private final java.util.List<JButton> letterButtons = new java.util.ArrayList<>();
+    private GameScreen gameScreen;
 
-    public GameScreenController(TCPClient tcpClient) {
+    public GameScreenController(TCPClient tcpClient, GameScreen gameScreen) {
+        this.gameScreen = gameScreen;
         this.tcpClient = tcpClient;
     }
 
@@ -34,13 +36,15 @@ public class GameScreenController {
 
         selectedLettersPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         selectedLettersPanel.setOpaque(false);
+
         shuffledLettersPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         shuffledLettersPanel.setOpaque(false);
 
+        // Vị trí: hàng sắp xếp (trên), hàng lựa chọn (dưới)
         layeredPane.add(selectedLettersPanel,
-                new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 250, 700, 80));
+                new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 800, 80));
         layeredPane.add(shuffledLettersPanel,
-                new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 370, 700, 80));
+                new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 370, 800, 80));
         layeredPane.setLayer(selectedLettersPanel, JLayeredPane.PALETTE_LAYER);
         layeredPane.setLayer(shuffledLettersPanel, JLayeredPane.PALETTE_LAYER);
     }
@@ -54,32 +58,59 @@ public class GameScreenController {
         int seconds = (int)Math.ceil(msLeft / 1000.0);
         if (seconds <= 0) seconds = Math.max(1, fallbackSeconds);
 
-        CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(this::nextWord));
+        CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(() -> {
+            gameScreen.countDown(30);
+            nextWord();
+        }));
+    }
+
+    private String normalizeNoSpace(String s) {
+        if (s == null) return "";
+        return s.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
     }
 
     public boolean checkAnswer() {
         if (current == null) return false;
-        String ans = String.join("", selectedLetters).trim().toLowerCase();
-        return ans.equals(current.getOriginalWord().trim().toLowerCase());
+        String ans = normalizeNoSpace(String.join("", selectedLetters));
+        String target = normalizeNoSpace(current.getOriginalWord());
+        return ans.equals(target);
+    }
+
+    // Dọn ngay dòng đã sắp xếp
+    public void clearSelectedLetters() {
+        selectedLetters.clear();
+        selectedLettersPanel.removeAll();
+        selectedLettersPanel.revalidate();
+        selectedLettersPanel.repaint();
+
+        // Kích hoạt lại toàn bộ nút chữ cái (phòng khi người chơi dựng sai trước đó)
+        for (JButton btn : letterButtons) {
+            btn.setEnabled(true);
+            btn.setBackground(new Color(0, 255, 255));
+        }
     }
 
     public void nextWord() {
         if (queue.isEmpty()) {
-            // hết batch (có thể yêu cầu server gửi thêm nếu muốn)
             JOptionPane.showMessageDialog(layeredPane, "Hết câu hỏi!");
             return;
         }
         current = queue.pollFirst();
-        selectedLetters.clear();
+        clearSelectedLetters();
         renderShuffledLetters();
-        renderSelectedLetters();
     }
 
     private void renderShuffledLetters() {
         shuffledLettersPanel.removeAll();
         letterButtons.clear();
 
-        for (String letter : current.getShuffledLetters()) {
+        // Bỏ khoảng trắng trong danh sách hiển thị ở hàng dưới
+        java.util.List<String> letters = current.getShuffledLetters()
+                .stream()
+                .filter(ch -> ch != null && !ch.trim().isEmpty())
+                .collect(Collectors.toList());
+
+        for (String letter : letters) {
             JButton btn = makeLetterButton(letter);
             btn.addActionListener(e -> {
                 if (btn.isEnabled()) {
@@ -142,7 +173,7 @@ public class GameScreenController {
         label.setForeground(Color.WHITE);
         label.setPreferredSize(new Dimension(50, 50));
         label.setOpaque(true);
-        label.setBackground(new Color(0, 200, 200, 100));
+        label.setBackground(new Color(0, 200, 200, 200));
         label.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
         return label;
     }
