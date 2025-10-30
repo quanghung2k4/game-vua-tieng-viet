@@ -49,7 +49,7 @@ public class GameScreenController {
         layeredPane.setLayer(shuffledLettersPanel, JLayeredPane.PALETTE_LAYER);
     }
 
-    public void startWithBatch(WordBatchDTO batch, long startAtEpochMs, int fallbackSeconds, JFrame owner) {
+    public void startWithBatch(WordBatchDTO batch, long startAtEpochMs, int fallbackSeconds, int totalTime, JFrame owner) {
         queue.clear();
         queue.addAll(batch.getChallenges());
 
@@ -59,7 +59,7 @@ public class GameScreenController {
         if (seconds <= 0) seconds = Math.max(1, fallbackSeconds);
 
         CountDownDialog.show(owner, seconds, () -> SwingUtilities.invokeLater(() -> {
-            gameScreen.countDown(120);
+            gameScreen.countDown(totalTime);
             nextWord();
         }));
     }

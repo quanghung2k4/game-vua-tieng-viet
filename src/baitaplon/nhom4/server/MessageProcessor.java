@@ -236,8 +236,8 @@ public class MessageProcessor {
         User user1 = userService.getUserByUserName(userA);
         User user2 = userService.getUserByUserName(userB);
 
-        GameStartDTO dtoAB = new GameStartDTO(userA, userA, userB, user1.getDisplayName(), user2.getDisplayName(), batch, startAt, 3);
-        GameStartDTO dtoBA = new GameStartDTO(userA, userB, userA, user2.getDisplayName(), user1.getDisplayName(), batch, startAt, 3);
+        GameStartDTO dtoAB = new GameStartDTO(userA, userA, userB, user1.getDisplayName(), user2.getDisplayName(), batch, startAt, 3, 120);
+        GameStartDTO dtoBA = new GameStartDTO(userA, userB, userA, user2.getDisplayName(), user1.getDisplayName(), batch, startAt, 3, 120);
 
         MessageModel startA = new MessageModel("game_start", dtoAB);
         MessageModel startB = new MessageModel("game_start", dtoBA);

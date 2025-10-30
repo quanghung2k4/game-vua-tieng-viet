@@ -71,7 +71,7 @@ public class GameScreen extends javax.swing.JFrame {
         opponentName.setText(dto.getPlayer2DisplayName());
 
         // Count down 3-2-1 theo đồng hồ server rồi render câu đầu
-        controller.startWithBatch(dto.getBatch(), dto.getStartAtEpochMs(), dto.getCountdownSeconds(), this);
+        controller.startWithBatch(dto.getBatch(), dto.getStartAtEpochMs(), dto.getCountdownSeconds(), dto.getTotalTimeGameplay(), this);
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

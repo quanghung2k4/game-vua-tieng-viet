@@ -13,8 +13,8 @@ public class GameStartDTO implements Serializable {
     private final WordBatchDTO batch;
     private final long startAtEpochMs;     // thời điểm bắt đầu chung (server đặt now + 3.5s)
     private final int countdownSeconds;    // fallback hiển thị countdown
-
-    public GameStartDTO(String inviter, String player1, String player2, String player1DisplayName, String player2DisplayName, WordBatchDTO batch, long startAtEpochMs, int countdownSeconds) {
+    private final int totalTime;
+    public GameStartDTO(String inviter, String player1, String player2, String player1DisplayName, String player2DisplayName, WordBatchDTO batch, long startAtEpochMs, int countdownSeconds,  int totalTime) {
         this.inviter = inviter;
         this.player1 = player1;
         this.player2 = player2;
@@ -23,6 +23,7 @@ public class GameStartDTO implements Serializable {
         this.batch = batch;
         this.startAtEpochMs = startAtEpochMs;
         this.countdownSeconds = countdownSeconds;
+        this.totalTime = totalTime;
     }
 
     public String getInviter() { return inviter; }
@@ -33,4 +34,5 @@ public class GameStartDTO implements Serializable {
     public WordBatchDTO getBatch() { return batch; }
     public long getStartAtEpochMs() { return startAtEpochMs; }
     public int getCountdownSeconds() { return countdownSeconds; }
+    public int getTotalTimeGameplay() { return totalTime; }
 }
