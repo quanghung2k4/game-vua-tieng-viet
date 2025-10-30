@@ -44,6 +44,9 @@ public class MessageProcessor {
             case "request_invite_player":
                 handleInvitePlayer(message);
                 break;
+            case "invite_cancel":
+                handleInviteCancel(message);
+                break;
             case "response_invite":
                 handleResponseInvite(message);
                 break;
@@ -75,7 +78,8 @@ public class MessageProcessor {
                 String p1 = parts.length > 0 ? parts[0] : null;
                 String p2 = parts.length > 1 ? parts[1] : null;
                 String pWin = parts.length > 2 ? parts[2] : null;
-                String reason =  parts.length > 3 ? parts[3] : null;
+                String reason = parts.length > 3 ? parts[3] : null;
+                System.out.println(p1 + " vs " + p2);
                 GameSessionManager.finishGame(p1, p2, pWin, reason);
                 break;
             }
@@ -105,6 +109,7 @@ public class MessageProcessor {
         if (result.equals("OK")) {
             User loggedInUser = userService.getUserByUserName(username);
             client.setUser(loggedInUser);
+            handleRefreshPlayer(username);
         }
         client.sendMessage(new MessageModel("return_login", result));
     }
@@ -159,6 +164,7 @@ public class MessageProcessor {
 
         if ("OK".equals(result)) {
             System.out.println("✅ User " + username + " đã logout thành công");
+            handleRefreshPlayer(username);
         }
     }
 
@@ -188,6 +194,31 @@ public class MessageProcessor {
             receiverClient.sendMessage(inviteMsg);
         } catch (Exception e) {
             client.sendMessage(new MessageModel("invite_error", "Lỗi khi xử lý lời mời: " + e.getMessage()));
+        }
+    }
+
+    private void handleInviteCancel(MessageModel message) throws IOException {
+        try {
+            String[] parts = message.getContent().split("\\|");
+
+            String senderUsername = parts[0];
+            String receiverUsername = parts[1];
+
+            User sender = userService.getUserByUserName(senderUsername);
+            User receiver = userService.getUserByUserName(receiverUsername);
+
+            ClientHandler receiverClient = MainServer.getClientHandlerByUserName(receiver.getUsername());
+            if (receiverClient == null) {
+
+                return;
+            }
+
+            MessageModel inviteMsg = new MessageModel();
+            inviteMsg.setType("invite_cancel");
+            inviteMsg.setContent(sender.getUsername() + "," + sender.getDisplayName() + "|" + receiver.getUsername());
+            receiverClient.sendMessage(inviteMsg);
+        } catch (Exception e) {
+
         }
     }
 
@@ -232,7 +263,7 @@ public class MessageProcessor {
         long startAt = System.currentTimeMillis() + 3500; // 3.5s cho countdown + chuẩn bị UI
         WordBatchDTO batch = GameWordService.generateBatch(30, 5, 10);
 
-        System.out.println("startGameForUsers: "+userA +" "+ userB);
+        System.out.println("startGameForUsers: " + userA + " " + userB);
         User user1 = userService.getUserByUserName(userA);
         User user2 = userService.getUserByUserName(userB);
 
@@ -245,10 +276,24 @@ public class MessageProcessor {
         ClientHandler hA = MainServer.getClientHandlerByUserName(userA);
         ClientHandler hB = MainServer.getClientHandlerByUserName(userB);
 
-        if (hA != null) hA.sendMessage(startA);
-        if (hB != null) hB.sendMessage(startB);
+        if (hA != null) {
+            hA.sendMessage(startA);
+        }
+        if (hB != null) {
+            hB.sendMessage(startB);
+        }
 
         // Đăng ký cặp đang thi đấu để xử lý thoát/mất kết nối
         GameSessionManager.registerPair(userA, userB);
+    }
+
+    private void handleRefreshPlayer(String username) {
+        for (ClientHandler clientHandler : MainServer.getClientHandlers()) {
+            if (!clientHandler.getUser().getUsername().equals(username)) {
+                MessageModel messRefresh = new MessageModel("refresh_player", "");
+                clientHandler.sendMessage(messRefresh);
+            }
+
+        }
     }
 }

@@ -294,6 +294,9 @@ public class DashBoard extends javax.swing.JFrame {
     public void showMessageInvite(String message) {
         GlassPanePopup.showPopup(new Message(message));
     }
+    public void showMessageInvite(String message, MessageModel messCancel) {
+        GlassPanePopup.showPopup(new Message(message,messCancel));
+    }
     public void showMessageInvite(String message, boolean showButton) {
         GlassPanePopup.showPopup(new Message(message,showButton));
     }

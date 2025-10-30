@@ -120,9 +120,12 @@ public class GameScreen extends javax.swing.JFrame {
                     opponentName.getText(), opponentScore.getText(),
                     verdict
             );
+            result.setMyUsername(myUsername);
+            result.setoUsername(opponentUsername);
             JOptionPane.showMessageDialog(this, message, "Kết thúc ván", JOptionPane.INFORMATION_MESSAGE);
 
             GameResult gameResult = new GameResult(result);
+            
             gameResult.setVisible(true);
             this.dispose();
         } catch (Exception ex) {

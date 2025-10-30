@@ -56,6 +56,6 @@ public class ModelHistory {
         this.result = reusult;
     }
     public Object toRowTable(EventAction event){
-        return new Object[]{new ModelProfile(icon,name),time,result};
+        return new Object[]{new ModelProfile(icon,name),time,null,result};
     }
 }

@@ -54,6 +54,12 @@ public class MainServer {
         return null;
     }
 
+    public static List<ClientHandler> getClientHandlers() {
+        return clientHandlers;
+    }
+    
+    
+
     public void removeClientHandler(ClientHandler handler) {
         synchronized (clientHandlers) {
             // Dùng iterator để an toàn khi xóa

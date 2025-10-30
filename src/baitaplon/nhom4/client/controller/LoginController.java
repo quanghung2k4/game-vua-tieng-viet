@@ -108,7 +108,7 @@ public class LoginController {
 
             switch (content) {
                 case "OK":
-                    view.showMessage("Đăng nhập thành công!");
+//                    view.showMessage("Đăng nhập thành công!");
                     openDashboard(view.getUsername());
                     break;
                 case "INVALID_CREDENTIALS":

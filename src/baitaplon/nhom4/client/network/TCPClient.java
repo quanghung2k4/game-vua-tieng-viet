@@ -25,6 +25,7 @@ public class TCPClient {
     private LoginController loginController;
     private volatile GameScreen activeGameScreen;
     private baitaplon.nhom4.client.controller.LeaderboardController leaderboardController;
+    private static TCPClient tCPClient;
 
     public TCPClient(String host, int port) throws IOException {
         this.host = host;
@@ -40,6 +41,10 @@ public class TCPClient {
             System.err.println("Không thể kết nối tới server: " + e.getMessage());
             running = false;
         }
+        tCPClient = this;
+    }
+    public static TCPClient getInstance(){
+        return tCPClient;
     }
 
 
@@ -71,7 +76,7 @@ public class TCPClient {
                         dashBoardController.handleInviteResponse(message);
                         break;
                     case "invite_cancel":
-                        dashBoardController.handleInviteResponse(message);
+                        dashBoardController.handleInviteCancel(message);
                         break;
                     case "return_leaderboard":
                         if (leaderboardController != null) {
@@ -92,6 +97,9 @@ public class TCPClient {
                         if (activeGameScreen != null) {
                             activeGameScreen.handleGameEnd(message.getContent());
                         }
+                        break;
+                    case "refresh_player":
+                        dashBoardController.fetchPlayerList();
                         break;
                 }
             }
