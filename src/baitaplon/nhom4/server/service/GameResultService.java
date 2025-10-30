@@ -11,7 +11,7 @@ public class GameResultService {
 
     public void createGameResult(int user1Id, int user2Id, int result1, int result2, LocalDateTime playedAt) {
         String insertGameSql = "INSERT INTO matches (user1_id, user2_id, result_user1, result_user2, played_at) VALUES (?, ?, ?, ?, ?)";
-
+        System.out.println("ghi dtb");
         try (PreparedStatement ps = conn.prepareStatement(insertGameSql)) {
             ps.setInt(1, user1Id);
             ps.setInt(2, user2Id);

@@ -398,8 +398,9 @@ public class GameScreen extends javax.swing.JFrame {
                         String result = "3";
                         int mScore = Integer.parseInt(myScore.getText());
                         int oScore = Integer.parseInt(opponentScore.getText());
+                        System.out.println(mScore +" "+ oScore);
                         if(mScore > oScore) result = "1";
-                        if(mScore > mScore) result = "2";
+                        if(oScore > mScore) result = "2";
                         String content = myUsername +"|"+ opponentUsername +"|"+ result + "|" + "finish_game";
                         tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
                     }

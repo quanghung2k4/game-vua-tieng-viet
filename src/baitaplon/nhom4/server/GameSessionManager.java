@@ -1,8 +1,10 @@
 package baitaplon.nhom4.server;
 
 import baitaplon.nhom4.client.model.MessageModel;
+import baitaplon.nhom4.server.model.User;
 import baitaplon.nhom4.server.service.GameResultService;
 import baitaplon.nhom4.server.service.LeaderboardService;
+import baitaplon.nhom4.server.service.UserService;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -69,8 +71,13 @@ public class GameSessionManager {
     }
 
     private static void recordGameResult(String p1, String p2, String pWin) {
-        int user1Id = Integer.parseInt(p1);
-        int user2Id = Integer.parseInt(p2);
+        System.out.println("p1 = " + p1 + ", p2 = " + p2);
+        UserService userService = new UserService(conn);
+        User user1 = userService.getUserByUserName(p1);
+        User user2 = userService.getUserByUserName(p2);
+
+        int user1Id = user1.getUserId();
+        int user2Id = user2.getUserId();
         int result1 = 1, result2 = 1;
         if(pWin == null || pWin.equals("1")){
             result1 =  3;
@@ -79,7 +86,9 @@ public class GameSessionManager {
             result1 = 0;
             result2 = 3;
         }
+        System.out.println("Lấy thời gian bắt đầu cho p1: " + p1);
         LocalDateTime playedAt = getStartTime(p1);
+        System.out.println("playedAt = " + playedAt);
         GameResultService gameResultService = new GameResultService(conn);
         LeaderboardService leaderBoardService = new LeaderboardService(conn);
 
