@@ -16,13 +16,12 @@ public class MessageProcessor {
     private final Connection conn;
     private final UserService userService;
     private final LeaderboardService leaderboardService;
-    private final GameSessionManager gameSessionManager;
+
     public MessageProcessor(ClientHandler client, Connection conn) {
         this.client = client;
         this.conn = conn;
         this.userService = new UserService(conn);
         this.leaderboardService = new LeaderboardService(conn);
-        this.gameSessionManager = new GameSessionManager(conn);
     }
 
     public void process(MessageModel message) throws IOException {
@@ -77,14 +76,14 @@ public class MessageProcessor {
                 String p2 = parts.length > 1 ? parts[1] : null;
                 String pWin = parts.length > 2 ? parts[2] : null;
                 String reason =  parts.length > 3 ? parts[3] : null;
-                gameSessionManager.finishGame(p1, p2, pWin, reason);
+                GameSessionManager.finishGame(p1, p2, pWin, reason);
                 break;
             }
             case "player_out": {
                 // content: "loserUsername|opponentUsername" (opponent optional)
                 String[] parts = (message.getContent() == null ? "" : message.getContent()).split("\\|");
                 String loser = parts.length > 0 ? parts[0] : (client.getUser() != null ? client.getUser().getUsername() : null);
-                gameSessionManager.playerOut(loser);
+                GameSessionManager.playerOut(loser);
                 break;
             }
             default:
@@ -250,6 +249,6 @@ public class MessageProcessor {
         if (hB != null) hB.sendMessage(startB);
 
         // Đăng ký cặp đang thi đấu để xử lý thoát/mất kết nối
-        gameSessionManager.registerPair(conn, userA, userB);
+        GameSessionManager.registerPair(userA, userB);
     }
 }

@@ -19,8 +19,7 @@ public class MainServer {
             serverSocket = new ServerSocket(PORT);
             conn = DatabaseManager.getConnection();
             System.out.println("Server đang chạy ở port " + PORT);
-            conn = DatabaseManager.getConnection(); //Gọi hàm static lấy connection
-
+            GameSessionManager.init(conn);
 
             while (true) {
                 Socket client = serverSocket.accept();

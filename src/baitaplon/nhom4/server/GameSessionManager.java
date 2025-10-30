@@ -2,6 +2,7 @@ package baitaplon.nhom4.server;
 
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.server.service.GameResultService;
+import baitaplon.nhom4.server.service.LeaderboardService;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -10,15 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GameSessionManager {
     // map 1-1 giữa 2 username
-    private final Map<String, String> PAIRS = new ConcurrentHashMap<>();
-    private final Map<String, LocalDateTime> START_TIMES = new ConcurrentHashMap<>();
-    private Connection conn;
-    
-    public GameSessionManager(Connection conn) {
-        this.conn = conn;
+    private static final Map<String, String> PAIRS = new ConcurrentHashMap<>();
+    private static final Map<String, LocalDateTime> START_TIMES = new ConcurrentHashMap<>();
+    private static Connection conn;
+
+    public static void init(Connection connection) {
+        conn = connection;
     }
 
-    public void registerPair(Connection conn, String u1, String u2) {
+    public static void registerPair(String u1, String u2) {
         if (u1 == null || u2 == null) return;
         PAIRS.put(u1, u2);
         PAIRS.put(u2, u1);
@@ -28,14 +29,14 @@ public class GameSessionManager {
         START_TIMES.put(u2, now);
     }
 
-    public String getOpponent(String user) {
+    public static String getOpponent(String user) {
         return user == null ? null : PAIRS.get(user);
     }
-    public LocalDateTime getStartTime(String user) {
+    public static LocalDateTime getStartTime(String user) {
         return START_TIMES.get(user);
     }
 
-    public void removePair(String u1, String u2) {
+    public static void removePair(String u1, String u2) {
         if (u1 != null) {
             PAIRS.remove(u1);
             START_TIMES.remove(u1);
@@ -46,7 +47,7 @@ public class GameSessionManager {
         }
     }
 
-    public void endGame(String p1, String p2, String pWin, String reason) {
+    public static void endGame(String p1, String p2, String pWin, String reason) {
         System.out.println(p1+" "+p2+" "+pWin+" "+reason);
         try {
             ClientHandler player1 = MainServer.getClientHandlerByUserName(p1);
@@ -67,35 +68,40 @@ public class GameSessionManager {
         } catch (Exception ignored) {}
     }
 
-    private void recordGameResult(String p1, String p2, String pWin) {
+    private static void recordGameResult(String p1, String p2, String pWin) {
         int user1Id = Integer.parseInt(p1);
         int user2Id = Integer.parseInt(p2);
-        int result1 = 0, result2 = 0;
+        int result1 = 1, result2 = 1;
         if(pWin == null || pWin.equals("1")){
-            result1 =  1;
-            result2 = -1;
+            result1 =  3;
+            result2 = 0;
         } else if(pWin.equals("2")){
-            result1 = -1;
-            result2 = 1;
+            result1 = 0;
+            result2 = 3;
         }
         LocalDateTime playedAt = getStartTime(p1);
         GameResultService gameResultService = new GameResultService(conn);
+        LeaderboardService leaderBoardService = new LeaderboardService(conn);
+
         if(user1Id < user2Id) gameResultService.createGameResult(user1Id, user2Id, result1, result2, playedAt);
         else gameResultService.createGameResult(user2Id, user1Id, result2, result1, playedAt);
+
+        leaderBoardService.updateMatchResult(user1Id, result1 == 3, result1 == 1);
+        leaderBoardService.updateMatchResult(user2Id, result2 == 3, result2 == 1);
     }
 
-    public void finishGame(String p1, String p2, String pWin, String reason) {
+    public static void finishGame(String p1, String p2, String pWin, String reason) {
         endGame(p1, p2, pWin, reason);
     }
 
-    public void playerOut(String loser) {
+    public static void playerOut(String loser) {
         String opp = getOpponent(loser);
         if (opp != null) {
             endGame(opp, loser, null, "disconnect");
         }
     }
 
-    public void notifyDisconnect(String user) {
+    public static void notifyDisconnect(String user) {
         String opp = getOpponent(user);
         if (opp != null) {
             endGame(opp, user, null, "disconnect");
