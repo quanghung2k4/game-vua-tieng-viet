@@ -108,7 +108,7 @@ public class LoginController {
 
             switch (content) {
                 case "OK":
-                    view.showMessage("Đăng nhập thành công!");
+//                    view.showMessage("Đăng nhập thành công!");
                     openDashboard(view.getUsername());
                     break;
                 case "INVALID_CREDENTIALS":
@@ -145,7 +145,7 @@ public class LoginController {
     private void openDashboard(String username) {
         // Tạo Dashboard với username và client
         DashBoard dashboard = new DashBoard(username, client);
-        DashBoardController dashBoardController = new DashBoardController(dashboard,client);
+        DashBoardController dashBoardController = new DashBoardController(username, dashboard,client);
         dashboard.setDashBoardController(dashBoardController);
 
         client.setDashBoardController(dashBoardController);

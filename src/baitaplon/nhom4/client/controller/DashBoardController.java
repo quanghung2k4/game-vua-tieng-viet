@@ -8,6 +8,8 @@ import baitaplon.nhom4.client.component.HomeForm;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.swing.GlassPanePopup;
 import baitaplon.nhom4.client.view.GameScreen;
+import baitaplon.nhom4.shared.game.GameStartDTO;
+
 import javax.swing.SwingUtilities;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +24,27 @@ public class DashBoardController {
     private final DashBoard view;
     private final TCPClient client;
     private HomeForm homeForm;
+    private GameScreen currentGameScreen;
     private Timer refreshTimer;
     private boolean isRunning = false;
-
+    private String username;
     private ModelPlayer opponentPlayer;
+    private static DashBoardController dashBoardController;
 
-    public DashBoardController(DashBoard view, TCPClient client){
+    public DashBoardController(String username, DashBoard view, TCPClient client) {
         this.view = view;
         this.client = client;
+        this.username = username;
+        dashBoardController = this;
     }
-
-
+    
+    public static DashBoardController getInstance(){
+        return dashBoardController;
+    }
+    
+    public DashBoard getDashBoard(){
+        return this.view;
+    }
 
     /**
      * Bắt đầu lấy danh sách người chơi và cập nhật định kỳ
@@ -47,16 +59,16 @@ public class DashBoardController {
         // Lấy danh sách ngay lập tức
         fetchPlayerList();
 
-        // Tạo timer để cập nhật mỗi 1 phút (60 giây)
-        refreshTimer = new Timer(true);
-        refreshTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (isRunning) {
-                    fetchPlayerList();
-                }
-            }
-        }, 60000, 60000); // Delay 60s, repeat every 60s
+//        // Tạo timer để cập nhật mỗi 1 phút (60 giây)
+//        refreshTimer = new Timer(true);
+//        refreshTimer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (isRunning) {
+//                    fetchPlayerList();
+//                }
+//            }
+//        }, 60000, 60000); // Delay 60s, repeat every 60s
     }
 
     /**
@@ -73,7 +85,7 @@ public class DashBoardController {
     /**
      * Gửi request lấy danh sách người chơi từ server
      */
-    private void fetchPlayerList() {
+    public void fetchPlayerList() {
         new Thread(() -> {
             try {
                 // Tạo request message
@@ -149,7 +161,7 @@ public class DashBoardController {
 
                     // Kiểm tra nếu username trùng với user hiện tại thì bỏ qua
                     if (!username.equals(getCurrentUsername())) {
-                        PlayerData player = new PlayerData(username,displayName, status, totalPoint);
+                        PlayerData player = new PlayerData(username, displayName, status, totalPoint);
                         playerList.add(player);
                     }
                 } else {
@@ -181,7 +193,9 @@ public class DashBoardController {
     private void updatePlayerListUI(List<PlayerData> playerList) {
         if (homeForm != null) {
             homeForm.updatePlayerList(playerList);
-        } else System.out.println("homeform null");
+        } else {
+            System.out.println("homeform null");
+        }
     }
 
     /**
@@ -199,12 +213,12 @@ public class DashBoardController {
      */
     public void sendInvite(ModelPlayer player) {
         this.opponentPlayer = player;
-        System.out.println("Ðang gửi lời mời đến "+player.getUsername());
-        view.showMessageInvite("Đang mời người chơi " + player.getName()+" ...");
+        MessageModel messageCancel = new MessageModel("invite_cancel", view.getUsername()+"|"+player.getUsername());
+        view.showMessageInvite("Đang mời người chơi " + player.getName() + " ...",messageCancel);
         new Thread(() -> {
             try {
 //             Gửi yêu cầu mời người chơi
-                MessageModel request = new MessageModel("request_invite_player", view.getUsername()+"|"+player.getUsername());
+                MessageModel request = new MessageModel("request_invite_player", view.getUsername() + "|" + player.getUsername());
                 client.sendMessage(request);
 
             } catch (Exception ex) {
@@ -215,38 +229,67 @@ public class DashBoardController {
         }).start();
     }
 
-    public void handleInviteRespone(MessageModel message){
+    public void handleInviteResponse(MessageModel message) {
         SwingUtilities.invokeLater(() -> {
-            String [] parse = message.getContent().split("\\|");
-            String opponentName = parse[1];
-            String respone = parse[2];
-            switch (respone) {
-                case "respone_accept":
+            try {
+                if (message.getType().equals("invite_error")) {
                     GlassPanePopup.closePopupLast();
-                    view.showMessageInvite(opponentName + " đã chấp nhận");
-                    break;
-                case "respone_reject":
-                    GlassPanePopup.closePopupLast();
-                    view.showMessageInvite(opponentName + " đã từ chối lời mời.");
-
-                    break;
-                default:
-                    view.showMessageInvite(message.getContent());
-                    break;
+                    view.showMessageInvite(message.getContent(),false);
+                    closePopup();
+                    return;
+                }
+                String[] parse = message.getContent().split("\\|");
+                System.out.println(message.getContent());
+                String inviter = parse[0];
+                String invitee = parse[1];
+                String inviteeName = parse[2];
+                String response = parse[3];
+                System.out.println(response);
+                switch (response) {
+                    case "response_accept":
+                        GlassPanePopup.closePopupLast();
+                        client.sendMessage(new MessageModel("invite_accept", view.getUsername() + "|" + invitee));
+                        view.showMessageInvite(inviteeName + " đã chấp nhận. Đang bắt đầu trò chơi...",false); // optional
+                        closePopup();
+                        break;
+                    case "response_reject":
+                        GlassPanePopup.closePopupLast();
+                        view.showMessageInvite(inviteeName + " đã từ chối lời mời.",false);
+                        closePopup();
+                        break;
+                    default:
+                        view.showMessageInvite(message.getContent(),false);
+                        closePopup();
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
-    public void handleReceiveInvite(MessageModel message){
+
+    public void handleReceiveInvite(MessageModel message) {
         String[] parts = message.getContent().split("\\|");
         String senderUsername = parts[0].split(",")[0];
         String senderDisplayName = parts[0].split(",")[1];
         String receiverUsername = parts[1];
-        System.out.println(senderUsername+" "+senderDisplayName+" "+receiverUsername);
         SwingUtilities.invokeLater(() -> {
-            view.showMessageInvited(senderUsername,receiverUsername,senderDisplayName);
+            view.showMessageInvited(senderUsername, receiverUsername, senderDisplayName);
         });
 
     }
+    public void handleInviteCancel(MessageModel message) {
+        SwingUtilities.invokeLater(() -> {
+            GlassPanePopup.closePopupLast();
+            String[] parts = message.getContent().split("\\|");
+            String senderUsername = parts[0].split(",")[0];
+            String senderDisplayName = parts[0].split(",")[1];
+            String receiverUsername = parts[1];
+            view.showMessageInvite(senderDisplayName+" đã hủy lời mời",false);
+            closePopup();
+        });
+    }
+
     /**
      * Tạo danh sách người chơi demo khi không kết nối được server
      */
@@ -267,6 +310,33 @@ public class DashBoardController {
         }
 
         updatePlayerListUI(fallbackList);
+    }
+
+    public void handleGameStart(GameStartDTO dto) {
+        SwingUtilities.invokeLater(() -> {
+            // Mở GameScreen (nếu chưa mở), truyền tcp client để controller có thể lắng nghe thêm
+            if (currentGameScreen == null) {
+                currentGameScreen = new GameScreen(client);
+                currentGameScreen.setLocationRelativeTo(null);
+                currentGameScreen.setVisible(true);
+            }
+            // Forward DTO để GameScreen bắt đầu countdown và hiển thị batch
+            currentGameScreen.startGame(dto);
+
+            // Ẩn dashboard
+            if (view != null) {
+                view.setVisible(false);
+            }
+        });
+    }
+
+    public void closePopup() {
+        // Đóng popup sau 1 giây
+        javax.swing.Timer timer = new javax.swing.Timer(1000, e -> {
+            GlassPanePopup.closePopupLast();
+        });
+        timer.setRepeats(false);
+        timer.start();           // Bắt đầu đếm
     }
 
     public void setHomeForm(HomeForm homeForm) {

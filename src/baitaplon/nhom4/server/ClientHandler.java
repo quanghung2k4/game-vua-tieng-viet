@@ -2,10 +2,16 @@ package baitaplon.nhom4.server;
 
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.server.model.User;
+
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
 import java.sql.Connection;
 
+/**
+ * ClientHandler chịu trách nhiệm giao tiếp với 1 client.
+ * Ghi chú: sendMessage giờ bền hơn — nó không ném IOException ra ngoài nữa,
+ * mà sẽ dọn dẹp connection và xoá handler khỏi server khi socket bị đóng.
+ */
 public class ClientHandler implements Runnable {
 
     private final Socket socket;
@@ -32,40 +38,99 @@ public class ClientHandler implements Runnable {
             System.out.println("🟢 Client connected: " + socket.getInetAddress());
 
             while (isRunning) {
-                MessageModel message = (MessageModel) in.readObject();
-                if (message != null) {
-                    messageProcessor.process(message);
+                Object obj;
+                try {
+                    obj = in.readObject();
+                } catch (EOFException eof) {
+                    // client chủ động đóng connection
+                    System.out.println("🔴 Client ngắt kết nối (EOF): " + socket.getInetAddress());
+                    break;
+                } catch (IOException ioe) {
+                    System.out.println("🔴 Lỗi đọc từ client: " + ioe.getMessage());
+                    break;
+                }
+
+                if (obj instanceof MessageModel) {
+                    MessageModel message = (MessageModel) obj;
+                    if (message != null) {
+                        try {
+                            messageProcessor.process(message);
+                        } catch (Exception e) {
+                            // Bảo toàn vòng lặp — nếu xử lý message lỗi thì log và tiếp tục
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    // Nếu đọc được object không phải MessageModel, có thể bỏ qua hoặc log
+                    System.out.println("⚠️ Nhận object không phải MessageModel: " + (obj != null ? obj.getClass() : "null"));
                 }
             }
 
-        } catch (EOFException e) {
-            System.out.println("🔴 Client ngắt kết nối: " + socket.getInetAddress());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("🔴 Lỗi ClientHandler: " + e.getMessage());
+            // e.printStackTrace();
         } finally {
             closeConnection();
         }
     }
 
-    public void sendMessage(MessageModel message) throws IOException {
-        if (out != null) {
+    /**
+     * Gửi Message đến client. Nếu gửi thất bại (socket đã đóng, connection reset, ...)
+     * thì dọn dẹp connection và xoá handler khỏi server. Phương thức này KHÔNG ném exception.
+     */
+    public synchronized void sendMessage(MessageModel message) {
+        if (out == null || socket == null || socket.isClosed()) {
+            // Không còn kết nối, dọn dẹp
+            closeConnection();
+            return;
+        }
+        try {
             out.writeObject(message);
             out.flush();
+        } catch (IOException e) {
+            System.out.println("🔴 Gửi message thất bại tới client " + (socket != null ? socket.getInetAddress() : "") + ": " + e.getMessage());
+            // Dọn dẹp và loại bỏ handler khỏi server
+            closeConnection();
         }
     }
 
-    private void closeConnection() {
+    /**
+     * Đóng kết nối an toàn, đóng streams, socket, và thông báo cho MainServer loại bỏ handler.
+     */
+    public synchronized void closeConnection() {
+        if (!isRunning) {
+            // đã dọn dẹp rồi
+            return;
+        }
+        isRunning = false;
         try {
-            if (in != null) in.close();
-            if (out != null) out.close();
-            if (socket != null) socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (user != null) {
+                GameSessionManager.notifyDisconnect(user.getUsername());
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            if (in != null) {
+                try { in.close(); } catch (IOException ignored) {}
+            }
+            if (out != null) {
+                try { out.close(); } catch (IOException ignored) {}
+            }
+            if (socket != null && !socket.isClosed()) {
+                try { socket.close(); } catch (IOException ignored) {}
+            }
+        } finally {
+            // Thông báo server loại bỏ handler khỏi danh sách
+            try {
+                server.removeClientHandler(this);
+            } catch (Exception ignored) {}
+            System.out.println("🔴 Đã đóng connection và loại bỏ ClientHandler cho " + (user != null ? user.getUsername() : socket.getInetAddress()));
         }
     }
+
     public User getUser() {
-    return user;
-}
+        return user;
+    }
 
     public void setUser(User user) {
         this.user = user;

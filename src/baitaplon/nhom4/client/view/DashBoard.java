@@ -118,7 +118,7 @@ public class DashBoard extends javax.swing.JFrame {
      */
     private void initializePlayerListRefresh() {
         if (client != null && controller == null) {
-            controller = new DashBoardController(this, client);
+            controller = new DashBoardController(username, this, client);
             controller.setHomeForm(homeForm);
             controller.startPlayerListRefresh();
             homeForm.setController(controller);
@@ -150,7 +150,7 @@ public class DashBoard extends javax.swing.JFrame {
             public void windowClosing(WindowEvent e) {
                 if (controller != null) {
                     controller.stopPlayerListRefresh();
-                    System.out.println("Đã dừng refresh danh sách người chơi");
+//                    System.out.println("Đã dừng refresh danh sách người chơi");
                 }
                 // Gửi request logout khi đóng window
                 sendLogoutRequest();
@@ -293,6 +293,12 @@ public class DashBoard extends javax.swing.JFrame {
 
     public void showMessageInvite(String message) {
         GlassPanePopup.showPopup(new Message(message));
+    }
+    public void showMessageInvite(String message, MessageModel messCancel) {
+        GlassPanePopup.showPopup(new Message(message,messCancel));
+    }
+    public void showMessageInvite(String message, boolean showButton) {
+        GlassPanePopup.showPopup(new Message(message,showButton));
     }
     public void showMessageInvited(String userNameSender, String userNameReciever,String displaySender){
         GlassPanePopup.showPopup(new MessageChallage(userNameSender,userNameReciever,displaySender,client));

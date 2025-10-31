@@ -1,11 +1,16 @@
 package baitaplon.nhom4.client.component;
 
+import baitaplon.nhom4.client.model.MessageModel;
+import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.swing.GlassPanePopup;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class Message extends javax.swing.JPanel {
@@ -14,10 +19,26 @@ public class Message extends javax.swing.JPanel {
      * Creates new form Message
      */
     private String mess;
+    private MessageModel messageModel;
+    private TCPClient tCPClient;
     public Message(String mess) {
         this.mess = mess;
         initComponents();
         lbInvite.setText(mess);
+        setOpaque(false);
+    }
+    public Message(String mess, boolean showButton) {
+        this.mess = mess;
+        initComponents();
+        lbInvite.setText(mess);
+        button1.setVisible(false);
+        setOpaque(false);
+    }
+    public Message(String mess,MessageModel messageModel) {
+        this.mess = mess;
+        initComponents();
+        lbInvite.setText(mess);
+        this.messageModel = messageModel;
         setOpaque(false);
     }
 
@@ -41,7 +62,10 @@ public class Message extends javax.swing.JPanel {
         setBackground(new java.awt.Color(255, 255, 255));
 
         lbInvite.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        lbInvite.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lbInvite.setText("Đang mời người chơi ...");
+        lbInvite.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        lbInvite.setName(""); // NOI18N
 
         button1.setBackground(new java.awt.Color(102, 255, 255));
         button1.setForeground(new java.awt.Color(255, 255, 255));
@@ -63,14 +87,13 @@ public class Message extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(54, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(button1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(197, 197, 197))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(lbInvite, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37))))
+                .addContainerGap(199, Short.MAX_VALUE)
+                .addComponent(button1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(197, 197, 197))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lbInvite, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -89,6 +112,14 @@ public class Message extends javax.swing.JPanel {
     }//GEN-LAST:event_button1ActionPerformed
 
     private void button1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_button1MouseClicked
+        tCPClient = TCPClient.getInstance();
+        try {
+            tCPClient.sendMessage(messageModel);
+        } catch (IOException ex) {
+            Logger.getLogger(Message.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Message.class.getName()).log(Level.SEVERE, null, ex);
+        }
         GlassPanePopup.closePopupLast();
     }//GEN-LAST:event_button1MouseClicked
 
