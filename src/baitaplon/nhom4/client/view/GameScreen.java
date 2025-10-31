@@ -234,7 +234,7 @@ public class GameScreen extends javax.swing.JFrame {
         jLayeredPane1.setMaximumSize(new java.awt.Dimension(327, 327));
         jLayeredPane1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        btnCheck.setBackground(new java.awt.Color(0, 255, 255));
+        btnCheck.setBackground(new java.awt.Color(0, 159, 189));
         btnCheck.setForeground(new java.awt.Color(255, 255, 255));
         btnCheck.setText("Kiểm tra");
         btnCheck.setFont(new java.awt.Font("SansSerif", 1, 18));
@@ -245,7 +245,7 @@ public class GameScreen extends javax.swing.JFrame {
         });
         jLayeredPane1.add(btnCheck, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 490, 180, 40));
 
-        btnExit.setBackground(new java.awt.Color(0, 255, 255));
+        btnExit.setBackground(new java.awt.Color(255, 0, 8));
         btnExit.setForeground(new java.awt.Color(255, 255, 255));
         btnExit.setText("Thoát");
         btnExit.setFont(new java.awt.Font("SansSerif", 0, 14));
