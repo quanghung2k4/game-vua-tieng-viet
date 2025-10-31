@@ -101,6 +101,9 @@ public class TCPClient {
                     case "refresh_player":
                         dashBoardController.fetchPlayerList();
                         break;
+                    case "return_history":
+                        dashBoardController.handleHistory(message);
+                        break;
                 }
             }
         } catch (Exception e) {

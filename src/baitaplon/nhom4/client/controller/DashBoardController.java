@@ -1,20 +1,19 @@
 package baitaplon.nhom4.client.controller;
 
+import baitaplon.nhom4.client.component.History;
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.model.PlayerData;
 import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.view.DashBoard;
 import baitaplon.nhom4.client.component.HomeForm;
+import baitaplon.nhom4.client.model.ModelHistory;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.swing.GlassPanePopup;
 import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.shared.game.GameStartDTO;
 
 import javax.swing.SwingUtilities;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Controller cho Dashboard - xử lý việc lấy danh sách người chơi từ server
@@ -24,11 +23,13 @@ public class DashBoardController {
     private final DashBoard view;
     private final TCPClient client;
     private HomeForm homeForm;
+    private History historyForm;
     private GameScreen currentGameScreen;
     private Timer refreshTimer;
     private boolean isRunning = false;
     private String username;
     private ModelPlayer opponentPlayer;
+    
     private static DashBoardController dashBoardController;
 
     public DashBoardController(String username, DashBoard view, TCPClient client) {
@@ -180,7 +181,7 @@ public class DashBoardController {
     /**
      * Lấy username của user hiện tại
      */
-    private String getCurrentUsername() {
+    public String getCurrentUsername() {
         if (view != null) {
             return view.getUsername();
         }
@@ -329,6 +330,21 @@ public class DashBoardController {
             }
         });
     }
+    public void handleHistory(MessageModel mess){
+        SwingUtilities.invokeLater(() -> {
+            String [] parse = mess.getContent().split(";");
+            
+            List<ModelHistory> history = new ArrayList<>();
+            for(String x:parse){
+                
+                String [] parse2 = x.split("\\|");
+                history.add(new ModelHistory(null, parse2[1], parse2[2], parse2[3]));
+            }
+            Collections.reverse(history);
+            historyForm.initTableData(history);
+        });
+        
+    }
 
     public void closePopup() {
         // Đóng popup sau 1 giây
@@ -342,7 +358,10 @@ public class DashBoardController {
     public void setHomeForm(HomeForm homeForm) {
         this.homeForm = homeForm;
     }
-
+    
+    public void setHistoryForm(History historyForm) {
+        this.historyForm = historyForm;
+    }
     /**
      * Kiểm tra trạng thái hoạt động
      */

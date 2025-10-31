@@ -44,6 +44,9 @@ public class MessageProcessor {
             case "request_invite_player":
                 handleInvitePlayer(message);
                 break;
+            case "request_history":
+                handleHistory(message);
+                break;
             case "invite_cancel":
                 handleInviteCancel(message);
                 break;
@@ -295,5 +298,11 @@ public class MessageProcessor {
             }
 
         }
+    }
+
+    private void handleHistory(MessageModel message) {
+        String ans = userService.getHistoryByUserName(message.getContent());
+        MessageModel messageModel = new MessageModel("return_history",ans);
+        client.sendMessage(messageModel);
     }
 }
