@@ -5,9 +5,6 @@ import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.view.Register;
 import baitaplon.nhom4.client.view.Login;
 import javax.swing.SwingUtilities;
-import java.io.File;
-import java.nio.file.Files;
-import java.util.Base64;
 
 public class RegisterController {
     private final Register view;
@@ -18,6 +15,8 @@ public class RegisterController {
         this.view = view;
         this.client = client;
         this.view.addRegisterListener(e -> handleRegister());
+        // Đăng ký controller để nhận phản hồi từ TCPClient
+        this.client.setRegisterController(this);
     }
 
     private void handleRegister() {
@@ -29,7 +28,6 @@ public class RegisterController {
         String username = view.getUsername();
         String password = view.getPassword();
         String fullName = view.getFullName();
-        String avatarPath = view.getAvatarPath();
 
         // Validation input cơ bản
         if (username.isEmpty() || password.isEmpty() || fullName.isEmpty()) {
@@ -56,10 +54,10 @@ public class RegisterController {
         }
 
         // Bắt đầu quá trình đăng ký
-        startRegisterProcess(username, password, fullName, avatarPath);
+        startRegisterProcess(username, password, fullName);
     }
 
-    private void startRegisterProcess(String username, String password, String fullName, String avatarPath) {
+    private void startRegisterProcess(String username, String password, String fullName) {
         isRegistering = true;
         
         // Hiển thị trạng thái đang đăng ký
@@ -70,21 +68,14 @@ public class RegisterController {
         // Chạy đăng ký trong thread riêng để không block UI
         new Thread(() -> {
             try {
-                // Chuẩn bị dữ liệu avatar
-                String avatarData = "";
-                if (!avatarPath.isEmpty()) {
-                    avatarData = encodeAvatarToBase64(avatarPath);
-                }
-                
                 // Tạo request message với timestamp
-                String content = username.trim() + "|" + password + "|" + fullName.trim() + "|" + avatarData;
+                String content = username.trim() + "|" + password + "|" + fullName.trim();
                 MessageModel request = new MessageModel("request_register", content);
                 
                 // Gửi request đến server
                  client.sendMessage(request);
                 
-                // Xử lý response
-//                handleRegisterResponse(response, username);
+                // Phản hồi sẽ được nhận bất đồng bộ qua TCPClient.listenServer()
                 
             } catch (Exception ex) {
                 // Xử lý lỗi kết nối
@@ -100,7 +91,7 @@ public class RegisterController {
         }).start();
     }
 
-    private void handleRegisterResponse(MessageModel response, String username) {
+    public void handleRegisterResponse(MessageModel response) {
         SwingUtilities.invokeLater(() -> {
             if (response == null) {
                 view.showMessage("Không nhận được phản hồi từ server!");
@@ -111,7 +102,7 @@ public class RegisterController {
             
             if ("OK".equals(responseContent)) {
                 // Đăng ký thành công
-                view.showMessage("Đăng ký thành công! Chào mừng " + username);
+                view.showMessage("Đăng ký thành công!");
                 
                 // Chuyển về form Login
                 goBackToLogin();
@@ -171,17 +162,5 @@ public class RegisterController {
         System.out.println("Chuyển về Login sau khi đăng ký thành công");
     }
     
-    /**
-     * Encode avatar image thành Base64 string
-     */
-    private String encodeAvatarToBase64(String imagePath) {
-        try {
-            File imageFile = new File(imagePath);
-            byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
-            return Base64.getEncoder().encodeToString(imageBytes);
-        } catch (Exception e) {
-            System.err.println("Lỗi khi encode avatar: " + e.getMessage());
-            return "";
-        }
-    }
+    
 }

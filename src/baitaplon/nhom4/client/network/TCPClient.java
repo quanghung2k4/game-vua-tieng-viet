@@ -2,6 +2,7 @@ package baitaplon.nhom4.client.network;
 
 import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.controller.LoginController;
+import baitaplon.nhom4.client.controller.RegisterController;
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.shared.game.GameStartDTO;
@@ -24,6 +25,7 @@ public class TCPClient {
     private DashBoardController dashBoardController;
     private LoginController loginController;
     private volatile GameScreen activeGameScreen;
+    private RegisterController registerController;
     private baitaplon.nhom4.client.controller.LeaderboardController leaderboardController;
     private static TCPClient tCPClient;
 
@@ -62,6 +64,11 @@ public class TCPClient {
                 switch (message.getType()){
                     case "return_login":
                         loginController.handleLoginResponse(message);
+                        break;
+                    case "return_register":
+                        if (registerController != null) {
+                            registerController.handleRegisterResponse(message);
+                        }
                         break;
                     case "return_get_players":
                         dashBoardController.handlePlayerListResponse(message);
@@ -115,6 +122,9 @@ public class TCPClient {
     }
     public void setLoginController(LoginController loginController){
         this.loginController = loginController;
+    }
+    public void setRegisterController(RegisterController registerController) {
+        this.registerController = registerController;
     }
     public void setLeaderboardController(baitaplon.nhom4.client.controller.LeaderboardController leaderboardController) {
         this.leaderboardController = leaderboardController;
