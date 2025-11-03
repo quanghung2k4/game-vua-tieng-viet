@@ -173,7 +173,6 @@ public class GameScreen extends javax.swing.JFrame {
                                 + "|2|game_forfeit";
                 tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
             } catch (Exception ignore) {}
-            this.dispose();
         }
     }
 

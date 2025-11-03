@@ -24,7 +24,6 @@ public class DashBoardController {
     private final TCPClient client;
     private HomeForm homeForm;
     private History historyForm;
-    private GameScreen currentGameScreen;
     private Timer refreshTimer;
     private boolean isRunning = false;
     private String username;
@@ -315,16 +314,12 @@ public class DashBoardController {
 
     public void handleGameStart(GameStartDTO dto) {
         SwingUtilities.invokeLater(() -> {
-            // Mở GameScreen (nếu chưa mở), truyền tcp client để controller có thể lắng nghe thêm
-            if (currentGameScreen == null) {
-                currentGameScreen = new GameScreen(client);
-                currentGameScreen.setLocationRelativeTo(null);
-                currentGameScreen.setVisible(true);
-            }
-            // Forward DTO để GameScreen bắt đầu countdown và hiển thị batch
-            currentGameScreen.startGame(dto);
 
-            // Ẩn dashboard
+            GameScreen currentGameScreen;
+            currentGameScreen = new GameScreen(client);
+            currentGameScreen.setLocationRelativeTo(null);
+            currentGameScreen.setVisible(true);
+            currentGameScreen.startGame(dto);
             if (view != null) {
                 view.setVisible(false);
             }
