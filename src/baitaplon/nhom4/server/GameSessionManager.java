@@ -49,68 +49,81 @@ public class GameSessionManager {
         }
     }
 
-    public static void endGame(String p1, String p2, String pWin, String reason) {
-        System.out.println(p1+" "+p2+" "+pWin+" "+reason);
+    public static void endGame(String p1, String p2, String p1Score, String p2Score, String reason) {
+        System.out.println(p1+" "+p2+" "+p1Score+" "+p2Score+" "+reason);
         try {
             ClientHandler player1 = MainServer.getClientHandlerByUserName(p1);
             ClientHandler player2 = MainServer.getClientHandlerByUserName(p2);
-            if(pWin == null){
+            if(reason.equals("disconnect")){
                 if (player1 != null) player1.sendMessage(new MessageModel("game_end", "Win" + "|" + reason));
+                recordGameResult(p1, p2, 10, 0);
             }
             else{
                 String result1="", result2="";
-                if(pWin.equals("1")){ result1 = "Win"; result2 = "Lose"; }
-                else if (pWin.equals("2")){ result1 = "Lose"; result2 = "Win"; }
+                int p1Sc = Integer.parseInt(p1Score);
+                int p2Sc = Integer.parseInt(p2Score);
+                if(p1Sc > p2Sc){ result1 = "Win"; result2 = "Lose"; }
+                else if (p1Sc > p2Sc){ result1 = "Lose"; result2 = "Win"; }
                 else { result1 = "Draw"; result2 = "Draw"; }
                 if (player1 != null) player1.sendMessage(new MessageModel("game_end", result1 + "|" + reason));
                 if (player2 != null) player2.sendMessage(new MessageModel("game_end", result2 + "|" + reason));
+                recordGameResult(p1, p2, p1Sc, p2Sc);
             }
-            recordGameResult(p1, p2, pWin);
             removePair(p1, p2);
         } catch (Exception ignored) {}
     }
 
-    private static void recordGameResult(String p1, String p2, String pWin) {
+    private static void recordGameOutResult(String p1, String p2, int  p1Sc, int p2Sc) {
         UserService userService = new UserService(conn);
         User user1 = userService.getUserByUserName(p1);
         User user2 = userService.getUserByUserName(p2);
 
         int user1Id = user1.getUserId();
         int user2Id = user2.getUserId();
-        int result1 = 1, result2 = 1;
-        if(pWin == null || pWin.equals("1")){
-            result1 =  3;
-            result2 = 0;
-        } else if(pWin.equals("2")){
-            result1 = 0;
-            result2 = 3;
-        }
         LocalDateTime playedAt = getStartTime(p1);
         GameResultService gameResultService = new GameResultService(conn);
         LeaderboardService leaderBoardService = new LeaderboardService(conn);
 
-        if(user1Id < user2Id) gameResultService.createGameResult(user1Id, user2Id, result1, result2, playedAt);
-        else gameResultService.createGameResult(user2Id, user1Id, result2, result1, playedAt);
+        if(user1Id < user2Id) gameResultService.createGameResult(user1Id, user2Id, p1Sc, p2Sc, playedAt);
+        else gameResultService.createGameResult(user2Id, user1Id, p2Sc, p1Sc, playedAt);
 
-        leaderBoardService.updateMatchResult(user1Id, result1 == 3, result1 == 1);
-        leaderBoardService.updateMatchResult(user2Id, result2 == 3, result2 == 1);
+        leaderBoardService.updateMatchResult(user1Id, p1Sc > p2Sc, p1Sc == p2Sc);
+        leaderBoardService.updateMatchResult(user2Id, p2Sc > p1Sc, p1Sc == p2Sc);
     }
 
-    public static void finishGame(String p1, String p2, String pWin, String reason) {
-        endGame(p1, p2, pWin, reason);
+    private static void recordGameResult(String p1, String p2, int  p1Sc, int p2Sc) {
+        UserService userService = new UserService(conn);
+        User user1 = userService.getUserByUserName(p1);
+        User user2 = userService.getUserByUserName(p2);
+
+        int user1Id = user1.getUserId();
+        int user2Id = user2.getUserId();
+        LocalDateTime playedAt = getStartTime(p1);
+        GameResultService gameResultService = new GameResultService(conn);
+        LeaderboardService leaderBoardService = new LeaderboardService(conn);
+
+        if(user1Id < user2Id) gameResultService.createGameResult(user1Id, user2Id, p1Sc, p2Sc, playedAt);
+        else gameResultService.createGameResult(user2Id, user1Id, p2Sc, p1Sc, playedAt);
+
+        leaderBoardService.updateMatchResult(user1Id, p1Sc > p2Sc, p1Sc == p2Sc);
+        leaderBoardService.updateMatchResult(user2Id, p2Sc > p1Sc, p1Sc == p2Sc);
+    }
+
+    public static void finishGame(String p1, String p2, String p1Score, String p2Score, String reason) {
+        endGame(p1, p2, p1Score, p2Score, reason);
     }
 
     public static void playerOut(String loser) {
         String opp = getOpponent(loser);
         if (opp != null) {
-            endGame(opp, loser, null, "disconnect");
+            endGame(opp, loser, null, null, "disconnect");
         }
     }
 
     public static void notifyDisconnect(String user) {
         String opp = getOpponent(user);
         if (opp != null) {
-            endGame(opp, user, null, "disconnect");
+            endGame(opp, user, null, null, "disconnect");
         }
     }
 }

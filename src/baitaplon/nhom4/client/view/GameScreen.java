@@ -170,7 +170,7 @@ public class GameScreen extends javax.swing.JFrame {
         if (opt == JOptionPane.YES_OPTION) {
             try {
                 String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "")
-                                + "|2|game_forfeit";
+                                +myScore.getText() +"|"+ opponentScore.getText()+ "|game_forfeit";
                 tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
             } catch (Exception ignore) {}
         }
@@ -397,13 +397,13 @@ public class GameScreen extends javax.swing.JFrame {
             if (time < 0) {
                 try {
                     if(hosting.equals(myUsername)){
-                        String result = "3";
-                        int mScore = Integer.parseInt(myScore.getText());
-                        int oScore = Integer.parseInt(opponentScore.getText());
-                        System.out.println(mScore +" "+ oScore);
-                        if(mScore > oScore) result = "1";
-                        if(oScore > mScore) result = "2";
-                        String content = myUsername +"|"+ opponentUsername +"|"+ result + "|" + "finish_game";
+//                        String result = "3";
+//                        int mScore = Integer.parseInt(myScore.getText());
+//                        int oScore = Integer.parseInt(opponentScore.getText());
+//                        System.out.println(mScore +" "+ oScore);
+//                        if(mScore > oScore) result = "1";
+//                        if(oScore > mScore) result = "2";
+                        String content = myUsername +"|"+ opponentUsername +"|" + myScore.getText() +"|"+ opponentScore.getText() + "|" + "finish_game";
                         tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
                     }
                 } catch (Exception ignore) {}
