@@ -21,6 +21,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.border.LineBorder;
 import net.miginfocom.swing.MigLayout;
 
@@ -85,7 +87,11 @@ public class DashBoard extends javax.swing.JFrame {
                     main.showForm(leaderboardForm);
                     loadLeaderboard();
                 } else if (menuIndex == 2) {
-                    main.showForm(new History());
+                    try {
+                        main.showForm(new History());
+                    } catch (Exception ex) {
+                        Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } else {
                     main.showForm(homeForm);
                     initializePlayerListRefresh();
@@ -293,6 +299,9 @@ public class DashBoard extends javax.swing.JFrame {
 
     public void showMessageInvite(String message) {
         GlassPanePopup.showPopup(new Message(message));
+    }
+    public void showMessageInvite(String message, MessageModel messCancel) {
+        GlassPanePopup.showPopup(new Message(message,messCancel));
     }
     public void showMessageInvite(String message, boolean showButton) {
         GlassPanePopup.showPopup(new Message(message,showButton));

@@ -1,17 +1,28 @@
 
 package baitaplon.nhom4.client.component;
 
+import baitaplon.nhom4.client.controller.DashBoardController;
+import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.model.ModelHistory;
 import baitaplon.nhom4.client.model.ModelPlayer;
+import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.table.EventAction;
 import java.awt.Image;
+import java.io.IOException;
+import java.util.List;
 import javax.swing.ImageIcon;
 
 public class History extends javax.swing.JPanel {
-    public History() {
+    
+    private TCPClient tcpClient;
+    private DashBoardController dashBoardController;
+    public History() throws Exception {
         initComponents();
         table1.setShowGrid(false); // bỏ tất cả grid line
-        initTableData();
+        tcpClient = TCPClient.getInstance();
+        dashBoardController = DashBoardController.getInstance();
+        dashBoardController.setHistoryForm(this);
+        sendMessage();
     }
     
     
@@ -37,7 +48,7 @@ public class History extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Tên", "Thời gian", "Kết quả"
+                "Tên", "Thời gian bắt đầu", "Kết quả"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -101,15 +112,27 @@ public class History extends javax.swing.JPanel {
         EventAction eventAction = new EventAction() {
             @Override
             public void invite(ModelPlayer player) {
-                System.out.println("invent");
+                
             }
         };
-        ModelHistory x1 = new ModelHistory(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),"Jony Nguyen","19:15 9/10/2025","Thua");
         ModelHistory x2 = new ModelHistory(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),"Jony Nguyen","19:15 9/10/2025","Thắng");
         ModelHistory x3 = new ModelHistory(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25),"Jony Nguyen","19:15 9/10/2025","Hòa");
-        table1.addRow((Object[]) x1.toRowTable(eventAction));
         table1.addRow((Object[]) x2.toRowTable(eventAction));
         table1.addRow((Object[]) x3.toRowTable(eventAction));
+    }
+    
+    public void initTableData(List<ModelHistory> historyList){
+        table1.fixTable(jScrollPane1);
+        EventAction eventAction = new EventAction() {
+            @Override
+            public void invite(ModelPlayer player) {
+                
+            }
+        };
+        for (ModelHistory h:historyList){
+            h.setIcon(resizeIcon("/baitaplon/nhom4/client/icon/circle_user.png", 25, 25));
+            table1.addRow((Object[]) h.toRowTable(eventAction));
+        }
     }
     
      private ImageIcon resizeIcon(String path, int width, int height) {
@@ -117,5 +140,10 @@ public class History extends javax.swing.JPanel {
         Image img = icon.getImage();
         Image newImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(newImg);
+    }
+
+    private void sendMessage() throws IOException, ClassNotFoundException {
+        MessageModel mess = new MessageModel("request_history",dashBoardController.getCurrentUsername());
+        tcpClient.sendMessage(mess);
     }
 }

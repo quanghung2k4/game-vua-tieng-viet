@@ -1,9 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+
 package baitaplon.nhom4.client.view;
 
+import baitaplon.nhom4.client.controller.DashBoardController;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.model.ModelResult;
 import javax.swing.ImageIcon;
@@ -15,6 +13,7 @@ import javax.swing.ImageIcon;
 public class GameResult extends javax.swing.JFrame {
     
     private static ModelResult _result;
+    private DashBoardController dashBoardController;
     /**
      * Creates new form GameResult
      */
@@ -124,6 +123,7 @@ public class GameResult extends javax.swing.JFrame {
 
         myName.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         myName.setForeground(new java.awt.Color(51, 51, 51));
+        myName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         myName.setText("Bạn");
 
         opponentName.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
@@ -137,9 +137,9 @@ public class GameResult extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(41, 41, 41)
                 .addComponent(myScore, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
-                .addComponent(myName, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+                .addComponent(myName, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(result, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(opponentName, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -225,15 +225,24 @@ public class GameResult extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRefightMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnRefightMouseClicked
-        newGame();
-        this.dispose();
+
+        dashBoardController = DashBoardController.getInstance();
+        dashBoardController.getDashBoard().setVisible(true);
+        ModelPlayer player = new ModelPlayer();
+        player.setUsername(_result.getoUsername());
+        player.setName(_result.getOppointName());
+        dashBoardController.sendInvite(player);
+        this.dispose();   
     }//GEN-LAST:event_btnRefightMouseClicked
 
     private void btnRefightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefightActionPerformed
         // TODO add your handling code here:
+                
     }//GEN-LAST:event_btnRefightActionPerformed
 
     private void btnBackMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnBackMouseClicked
+        dashBoardController = DashBoardController.getInstance();
+        dashBoardController.getDashBoard().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnBackMouseClicked
 
@@ -315,9 +324,4 @@ public class GameResult extends javax.swing.JFrame {
         
     }
 
-    private void newGame() {
-        ModelPlayer player = new ModelPlayer("a",null,"Jony B", 20, "Busy");
-//        GameScreen dashBoard = new GameScreen(player);
-//        dashBoard.setVisible(true);
-    }
 }

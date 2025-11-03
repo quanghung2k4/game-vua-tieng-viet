@@ -31,7 +31,7 @@ public class Table extends JTable{
                     Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 TableHeader header = new TableHeader(value+"");
           
-                if(column == 2 || column == 3){
+                if(column == 1 || column == 2 || column == 3){
                     header.setHorizontalAlignment(JLabel.CENTER);
                 } else {
                     header.setHorizontalAlignment(JLabel.LEFT);
@@ -62,12 +62,21 @@ public class Table extends JTable{
                     } else if("Offline".equalsIgnoreCase(status)){
                         com.setForeground(new Color(255, 0, 0)); // đỏ tươi (red)
                     } else {
-                        com.setForeground(new Color(102,102,102)); // cam (orange) cho các trạng thái khác
+                        com.setForeground(new Color(102,102,102)); 
                     }
-                } else {
-                    // Các cột khác dùng màu xám
-                    com.setForeground(new Color(102,102,102));
-                }
+                } else if(column == 2){
+                    String result = value != null ? value.toString().trim() : "";
+                    if("Thắng".equalsIgnoreCase(result)){
+                        com.setFont(com.getFont().deriveFont(Font.BOLD, 16f));
+                        com.setForeground(new Color(0, 200, 83)); // xanh lá sáng (green)
+                    } else if("Thua".equalsIgnoreCase(result)){
+                        com.setFont(com.getFont().deriveFont(Font.BOLD, 16f));
+                        com.setForeground(new Color(255, 0, 0)); // đỏ tươi (red)
+                    } else if("Hòa".equalsIgnoreCase(result)){
+                        com.setFont(com.getFont().deriveFont(Font.BOLD, 16f));
+                        com.setForeground(new Color(102,102,102));
+                    }
+                } else  com.setForeground(new Color(102,102,102));
                 if(value instanceof ModelProfile){
                     ModelProfile data = (ModelProfile) value;
                     Profile cell = new Profile(data);

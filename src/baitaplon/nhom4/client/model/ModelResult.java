@@ -10,8 +10,10 @@ package baitaplon.nhom4.client.model;
  */
 public class ModelResult {
     private String myName;
+    private String myUsername;
     private String mScore;
     private String opponentName;
+    private String oUsername;
     private String oScore;
     private String result;
 
@@ -21,6 +23,39 @@ public class ModelResult {
         this.opponentName = opponentName;
         this.oScore = oScore;
         this.result = result;
+    }
+    public ModelResult(String myName,String  myUsername,String mScore, String opponentName, String oUsername,String oScore, String result) {
+        this.myName = myName;
+        this.myUsername = 
+        this.mScore = mScore;
+        this.opponentName = opponentName;
+        this.oUsername = oUsername;
+        this.oScore = oScore;
+        this.result = result;
+    }
+
+    public String getMyUsername() {
+        return myUsername;
+    }
+
+    public void setMyUsername(String myUsername) {
+        this.myUsername = myUsername;
+    }
+
+    public String getOpponentName() {
+        return opponentName;
+    }
+
+    public void setOpponentName(String opponentName) {
+        this.opponentName = opponentName;
+    }
+
+    public String getoUsername() {
+        return oUsername;
+    }
+
+    public void setoUsername(String oUsername) {
+        this.oUsername = oUsername;
     }
     
     

@@ -1,20 +1,19 @@
 package baitaplon.nhom4.client.controller;
 
+import baitaplon.nhom4.client.component.History;
 import baitaplon.nhom4.client.model.MessageModel;
 import baitaplon.nhom4.client.model.PlayerData;
 import baitaplon.nhom4.client.network.TCPClient;
 import baitaplon.nhom4.client.view.DashBoard;
 import baitaplon.nhom4.client.component.HomeForm;
+import baitaplon.nhom4.client.model.ModelHistory;
 import baitaplon.nhom4.client.model.ModelPlayer;
 import baitaplon.nhom4.client.swing.GlassPanePopup;
 import baitaplon.nhom4.client.view.GameScreen;
 import baitaplon.nhom4.shared.game.GameStartDTO;
 
 import javax.swing.SwingUtilities;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Controller cho Dashboard - xử lý việc lấy danh sách người chơi từ server
@@ -24,16 +23,28 @@ public class DashBoardController {
     private final DashBoard view;
     private final TCPClient client;
     private HomeForm homeForm;
+    private History historyForm;
     private GameScreen currentGameScreen;
     private Timer refreshTimer;
     private boolean isRunning = false;
     private String username;
     private ModelPlayer opponentPlayer;
+    
+    private static DashBoardController dashBoardController;
 
     public DashBoardController(String username, DashBoard view, TCPClient client) {
         this.view = view;
         this.client = client;
         this.username = username;
+        dashBoardController = this;
+    }
+    
+    public static DashBoardController getInstance(){
+        return dashBoardController;
+    }
+    
+    public DashBoard getDashBoard(){
+        return this.view;
     }
 
     /**
@@ -49,16 +60,16 @@ public class DashBoardController {
         // Lấy danh sách ngay lập tức
         fetchPlayerList();
 
-        // Tạo timer để cập nhật mỗi 1 phút (60 giây)
-        refreshTimer = new Timer(true);
-        refreshTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (isRunning) {
-                    fetchPlayerList();
-                }
-            }
-        }, 60000, 60000); // Delay 60s, repeat every 60s
+//        // Tạo timer để cập nhật mỗi 1 phút (60 giây)
+//        refreshTimer = new Timer(true);
+//        refreshTimer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (isRunning) {
+//                    fetchPlayerList();
+//                }
+//            }
+//        }, 60000, 60000); // Delay 60s, repeat every 60s
     }
 
     /**
@@ -75,7 +86,7 @@ public class DashBoardController {
     /**
      * Gửi request lấy danh sách người chơi từ server
      */
-    private void fetchPlayerList() {
+    public void fetchPlayerList() {
         new Thread(() -> {
             try {
                 // Tạo request message
@@ -170,7 +181,7 @@ public class DashBoardController {
     /**
      * Lấy username của user hiện tại
      */
-    private String getCurrentUsername() {
+    public String getCurrentUsername() {
         if (view != null) {
             return view.getUsername();
         }
@@ -203,7 +214,8 @@ public class DashBoardController {
      */
     public void sendInvite(ModelPlayer player) {
         this.opponentPlayer = player;
-        view.showMessageInvite("Đang mời người chơi " + player.getName() + " ...");
+        MessageModel messageCancel = new MessageModel("invite_cancel", view.getUsername()+"|"+player.getUsername());
+        view.showMessageInvite("Đang mời người chơi " + player.getName() + " ...",messageCancel);
         new Thread(() -> {
             try {
 //             Gửi yêu cầu mời người chơi
@@ -262,11 +274,21 @@ public class DashBoardController {
         String senderUsername = parts[0].split(",")[0];
         String senderDisplayName = parts[0].split(",")[1];
         String receiverUsername = parts[1];
-        System.out.println(senderUsername + " " + senderDisplayName + " " + receiverUsername);
         SwingUtilities.invokeLater(() -> {
             view.showMessageInvited(senderUsername, receiverUsername, senderDisplayName);
         });
 
+    }
+    public void handleInviteCancel(MessageModel message) {
+        SwingUtilities.invokeLater(() -> {
+            GlassPanePopup.closePopupLast();
+            String[] parts = message.getContent().split("\\|");
+            String senderUsername = parts[0].split(",")[0];
+            String senderDisplayName = parts[0].split(",")[1];
+            String receiverUsername = parts[1];
+            view.showMessageInvite(senderDisplayName+" đã hủy lời mời",false);
+            closePopup();
+        });
     }
 
     /**
@@ -308,6 +330,21 @@ public class DashBoardController {
             }
         });
     }
+    public void handleHistory(MessageModel mess){
+        SwingUtilities.invokeLater(() -> {
+            String [] parse = mess.getContent().split(";");
+            
+            List<ModelHistory> history = new ArrayList<>();
+            for(String x:parse){
+                
+                String [] parse2 = x.split("\\|");
+                history.add(new ModelHistory(null, parse2[1], parse2[2], parse2[3]));
+            }
+            Collections.reverse(history);
+            historyForm.initTableData(history);
+        });
+        
+    }
 
     public void closePopup() {
         // Đóng popup sau 1 giây
@@ -321,7 +358,10 @@ public class DashBoardController {
     public void setHomeForm(HomeForm homeForm) {
         this.homeForm = homeForm;
     }
-
+    
+    public void setHistoryForm(History historyForm) {
+        this.historyForm = historyForm;
+    }
     /**
      * Kiểm tra trạng thái hoạt động
      */
