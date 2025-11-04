@@ -96,7 +96,7 @@ public class GameScreen extends javax.swing.JFrame {
             int p1Sc = Integer.parseInt(myScoreMess);
             int p2Sc = Integer.parseInt(opponentScoreMess);
             if(p1Sc > p2Sc){ verdict = "Win"; }
-            else if (p1Sc > p2Sc){ verdict = "Lose"; }
+            else if (p2Sc > p1Sc){ verdict = "Lose"; }
             else { verdict = "Draw"; }
 
             String message = "";
