@@ -55,40 +55,23 @@ public class GameSessionManager {
             ClientHandler player1 = MainServer.getClientHandlerByUserName(p1);
             ClientHandler player2 = MainServer.getClientHandlerByUserName(p2);
             if(reason.equals("disconnect")){
-                if (player1 != null) player1.sendMessage(new MessageModel("game_end", p1Score + "|" + p2Score + reason));
+                if (player1 != null) player1.sendMessage(new MessageModel("game_end", "10|0" + reason));
+                recordGameResult(p1, p2, 10, 0);
+            }
+            if(reason.equals("game_forfeit")){
+                if (player1 != null) player1.sendMessage(new MessageModel("game_end", "10|0" + reason));
+                if (player2 != null) player2.sendMessage(new MessageModel("game_end", "0|10" + reason));
                 recordGameResult(p1, p2, 10, 0);
             }
             else{
-                String result1="", result2="";
                 int p1Sc = Integer.parseInt(p1Score);
                 int p2Sc = Integer.parseInt(p2Score);
-                if(p1Sc > p2Sc){ result1 = "Win"; result2 = "Lose"; }
-                else if (p1Sc > p2Sc){ result1 = "Lose"; result2 = "Win"; }
-                else { result1 = "Draw"; result2 = "Draw"; }
                 if (player1 != null) player1.sendMessage(new MessageModel("game_end", p1Score + "|" + p2Score + "|" + reason));
                 if (player2 != null) player2.sendMessage(new MessageModel("game_end", p2Score + "|" + p1Score + "|" + reason));
                 recordGameResult(p1, p2, p1Sc, p2Sc);
             }
             removePair(p1, p2);
         } catch (Exception ignored) {}
-    }
-
-    private static void recordGameOutResult(String p1, String p2, int  p1Sc, int p2Sc) {
-        UserService userService = new UserService(conn);
-        User user1 = userService.getUserByUserName(p1);
-        User user2 = userService.getUserByUserName(p2);
-
-        int user1Id = user1.getUserId();
-        int user2Id = user2.getUserId();
-        LocalDateTime playedAt = getStartTime(p1);
-        GameResultService gameResultService = new GameResultService(conn);
-        LeaderboardService leaderBoardService = new LeaderboardService(conn);
-
-        if(user1Id < user2Id) gameResultService.createGameResult(user1Id, user2Id, p1Sc, p2Sc, playedAt);
-        else gameResultService.createGameResult(user2Id, user1Id, p2Sc, p1Sc, playedAt);
-
-        leaderBoardService.updateMatchResult(user1Id, p1Sc > p2Sc, p1Sc == p2Sc);
-        leaderBoardService.updateMatchResult(user2Id, p2Sc > p1Sc, p1Sc == p2Sc);
     }
 
     private static void recordGameResult(String p1, String p2, int  p1Sc, int p2Sc) {

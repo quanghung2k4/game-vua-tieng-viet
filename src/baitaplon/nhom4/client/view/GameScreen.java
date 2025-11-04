@@ -179,7 +179,7 @@ public class GameScreen extends javax.swing.JFrame {
         if (opt == JOptionPane.YES_OPTION) {
             try {
                 String content = (myUsername != null ? myUsername : "") + "|" + (opponentUsername != null ? opponentUsername : "")
-                                +myScore.getText() +"|"+ opponentScore.getText()+ "|game_forfeit";
+                                +"|"+ myScore.getText() +"|"+ opponentScore.getText()+ "|game_forfeit";
                 tcpClient.sendMessage(new baitaplon.nhom4.client.model.MessageModel("finish_game", content));
             } catch (Exception ignore) {}
         }
