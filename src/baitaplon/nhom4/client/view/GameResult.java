@@ -304,16 +304,16 @@ public class GameResult extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void initData() {
-        String tmp1 = "(+0)";
+        String tmp1 = "(+1)";
         String tmp2 = tmp1;
         imgResult.setIcon(null);
         if(_result.getResult().equals("Win")){
-            tmp1 = "(+1)";
-            tmp2 = "(-1)";
+            tmp1 = "(+3)";
+            tmp2 = "(+0)";
             imgResult.setIcon(new ImageIcon(getClass().getResource("/baitaplon/nhom4/client/icon/winner.png")));
         } else  if(_result.getResult().equals("Lose")){
-            tmp1 = "(-1)";
-            tmp2 = "(+1)";
+            tmp1 = "(+0)";
+            tmp2 = "(+3)";
             imgResult.setIcon(new ImageIcon(getClass().getResource("/baitaplon/nhom4/client/icon/loser.png")));
         }
         myName.setText(_result.getMyName()+tmp1);

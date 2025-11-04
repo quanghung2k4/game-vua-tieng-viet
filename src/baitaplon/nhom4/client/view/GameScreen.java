@@ -197,7 +197,7 @@ public class GameScreen extends javax.swing.JFrame {
 
         if (plusOneLabel == null) {
             plusOneLabel = new JLabel("+1", SwingConstants.CENTER);
-            plusOneLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+            plusOneLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
             plusOneLabel.setForeground(new Color(0, 255, 0));
             plusOneLabel.setOpaque(false);
             jLayeredPane1.add(plusOneLabel,

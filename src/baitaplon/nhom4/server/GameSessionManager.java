@@ -55,12 +55,12 @@ public class GameSessionManager {
             ClientHandler player1 = MainServer.getClientHandlerByUserName(p1);
             ClientHandler player2 = MainServer.getClientHandlerByUserName(p2);
             if(reason.equals("disconnect")){
-                if (player1 != null) player1.sendMessage(new MessageModel("game_end", "10|0" + reason));
+                if (player1 != null) player1.sendMessage(new MessageModel("game_end", "10|0|" + reason));
                 recordGameResult(p1, p2, 10, 0);
             }
             if(reason.equals("game_forfeit")){
-                if (player1 != null) player1.sendMessage(new MessageModel("game_end", "10|0" + reason));
-                if (player2 != null) player2.sendMessage(new MessageModel("game_end", "0|10" + reason));
+                if (player1 != null) player1.sendMessage(new MessageModel("game_end", "0|10|" + reason));
+                if (player2 != null) player2.sendMessage(new MessageModel("game_end", "10|0|" + reason));
                 recordGameResult(p1, p2, 10, 0);
             }
             else{
