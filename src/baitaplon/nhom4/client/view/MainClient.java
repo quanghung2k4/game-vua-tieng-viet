@@ -14,9 +14,6 @@ public class MainClient {
     public static void main(String[] args) throws IOException {
         // Set Look and Feel cho toàn bộ ứng dụng
         setLookAndFeel();
-
-        // Tạo TCPClient một lần duy nhất và tái sử dụng
-
         TCPClient client = new TCPClient("localhost", 3636);
 
         // Tạo Login form với client

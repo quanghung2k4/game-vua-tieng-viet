@@ -55,7 +55,7 @@ public class GameSessionManager {
             ClientHandler player1 = MainServer.getClientHandlerByUserName(p1);
             ClientHandler player2 = MainServer.getClientHandlerByUserName(p2);
             if(reason.equals("disconnect")){
-                if (player1 != null) player1.sendMessage(new MessageModel("game_end", "Win" + "|" + reason));
+                if (player1 != null) player1.sendMessage(new MessageModel("game_end", p1Score + "|" + p2Score + reason));
                 recordGameResult(p1, p2, 10, 0);
             }
             else{
@@ -65,8 +65,8 @@ public class GameSessionManager {
                 if(p1Sc > p2Sc){ result1 = "Win"; result2 = "Lose"; }
                 else if (p1Sc > p2Sc){ result1 = "Lose"; result2 = "Win"; }
                 else { result1 = "Draw"; result2 = "Draw"; }
-                if (player1 != null) player1.sendMessage(new MessageModel("game_end", result1 + "|" + reason));
-                if (player2 != null) player2.sendMessage(new MessageModel("game_end", result2 + "|" + reason));
+                if (player1 != null) player1.sendMessage(new MessageModel("game_end", p1Score + "|" + p2Score + "|" + reason));
+                if (player2 != null) player2.sendMessage(new MessageModel("game_end", p2Score + "|" + p1Score + "|" + reason));
                 recordGameResult(p1, p2, p1Sc, p2Sc);
             }
             removePair(p1, p2);

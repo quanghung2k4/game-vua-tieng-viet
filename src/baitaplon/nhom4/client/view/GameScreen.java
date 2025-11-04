@@ -88,8 +88,17 @@ public class GameScreen extends javax.swing.JFrame {
         try {
             isEndGame = true;
             String[] parts = (content == null ? "" : content).split("\\|");
-            String verdict = parts.length > 0 ? parts[0] : "";
-            String reason = parts.length > 1 ? parts[1] : "";
+            String myScoreMess = parts.length > 0 ? parts[0] : "";
+            String opponentScoreMess = parts.length > 1 ? parts[1] : "";
+            String reason = parts.length > 2 ? parts[2] : "";
+
+            String verdict="";
+            int p1Sc = Integer.parseInt(myScoreMess);
+            int p2Sc = Integer.parseInt(opponentScoreMess);
+            if(p1Sc > p2Sc){ verdict = "Win"; }
+            else if (p1Sc > p2Sc){ verdict = "Lose"; }
+            else { verdict = "Draw"; }
+
             String message = "";
             System.out.println(verdict+" "+reason);
             if(reason.equals("game_forfeit")){
@@ -116,8 +125,8 @@ public class GameScreen extends javax.swing.JFrame {
             }
             System.out.println(message);
             ModelResult result = new ModelResult(
-                    myName.getText(), myScore.getText(),
-                    opponentName.getText(), opponentScore.getText(),
+                    myName.getText(), myScoreMess,
+                    opponentName.getText(), opponentScoreMess,
                     verdict
             );
             result.setMyUsername(myUsername);
