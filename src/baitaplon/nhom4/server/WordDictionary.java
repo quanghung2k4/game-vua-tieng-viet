@@ -63,6 +63,8 @@ public class WordDictionary {
         if (!wordOpt.isPresent()) return Optional.empty();
 
         String originalWord = wordOpt.get();
+        originalWord = originalWord.substring(0, 1).toUpperCase() + originalWord.substring(1);
+
         List<String> originalLetters = splitToCodepointStrings(originalWord);
         List<String> shuffledLetters = new ArrayList<>(originalLetters);
 
